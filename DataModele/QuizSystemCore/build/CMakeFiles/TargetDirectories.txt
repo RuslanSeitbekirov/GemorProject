@@ -1,0 +1,3 @@
+C:/pp/GemorProject/DataModele/QuizSystemCore/build/CMakeFiles/quiz_system_core.dir
+C:/pp/GemorProject/DataModele/QuizSystemCore/build/CMakeFiles/ALL_BUILD.dir
+C:/pp/GemorProject/DataModele/QuizSystemCore/build/CMakeFiles/ZERO_CHECK.dir

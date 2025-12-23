@@ -1,0 +1,10 @@
+^C:\PP\GEMORPROJECT\DATAMODELE\QUIZSYSTEMCORE\BUILD\CMAKEFILES\3FD41559AA2FD5635F23DE037CA2BAB8\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/pp/GemorProject/DataModele/QuizSystemCore -BC:/pp/GemorProject/DataModele/QuizSystemCore/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/pp/GemorProject/DataModele/QuizSystemCore/build/QuizSystemCore.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
