@@ -1,0 +1,49 @@
+:root{
+    --circle-size: 50px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    list-style-type: none;
+}
+
+
+.topLine {
+    width: 100%;
+    background-color: rgb(207, 207, 207);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between; /* Добавьте это! */
+    align-items: center; /* Выравнивание по вертикали */
+    padding: 10px 20px; /* Отступы для красоты */
+}
+
+.Profile {
+    border: 2px solid black;
+    border-radius: 50%;
+    width: var(--circle-size);
+    height: var(--circle-size);
+}
+
+#Profile_img{
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: rgb(48, 173, 69);
+    object-fit: cover;
+
+}
+
+.Profile:hover{
+    cursor: pointer;
+}
+
+.TestList {
+    padding: 20px;
+}
+
+
