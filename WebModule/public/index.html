@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Тестовая система</title>
-    <link rel="stylesheet" href="GENstyle.css">
+    <link rel="stylesheet" href="css/GENstyle.css">
 </head>
 <body>
-    <!-- Шапка для авторизованных пользователей -->
+     <!-- Шапка для авторизованных пользователей -->
     <div class="topLine" id="header" style="display: none;">
         <div class="logo">
             Тестовая система
@@ -68,16 +68,28 @@
         }
         
         // Обновляем статус при загрузке
-        document.addEventListener('DOMContentLoaded', () => {
-            if (auth && auth.currentSession) {
-                updateStatusIndicator();
-                
-                // Показываем шапку для авторизованных
-                if (auth.currentSession.status === 'authorized') {
-                    document.getElementById('header').style.display = 'flex';
-                }
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM загружен, проверяем состояние пользователя...');
+            
+            // Симуляция запроса к Nginx
+            console.log('[Имитация Nginx] Получен запрос от браузера');
+            
+            // Проверяем сессию
+            const sessionToken = getCookie('session_token');
+            if (sessionToken) {
+                console.log('[Имитация Nginx] Найден токен сессии в куках:', sessionToken.substring(0, 20) + '...');
+            } else {
+                console.log('[Имитация Nginx] Токен сессии не найден');
             }
         });
+        
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
     </script>
 </body>
-</html>
+</html>  
+
