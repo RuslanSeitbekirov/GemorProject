@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои тесты</title>
+    <link rel="stylesheet" href="css/GENstyle.css">
+    <style>
+        .my-tests-container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .tests-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .test-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            transition: all 0.3s;
+        }
+        
+        .test-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .test-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .test-description {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .test-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #888;
+        }
+        
+        .meta-item {
+            background: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+        }
+        
+        .test-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            flex-grow: 1;
+        }
+        
+        .btn-view {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-edit {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #666;
+        }
+        
+        .empty-state p {
+            margin: 10px 0 20px 0;
+        }
+        
+        .btn-create {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Шапка для авторизованных пользователей -->
+    <div class="topLine" id="header" style="display: none;">
+        <div class="logo">
+            Тестовая система
+            <span id="statusIndicator" class="status-indicator"></span>
+        </div>
+        <div class="Profile">
+            <a href="javascript:void(0)" onclick="showProfile()">
+                <img src="img/Prof.jpg" alt="Профиль" id="Profile_img">
+                <span id="username"></span>
+            </a>
+            <div class="header-actions">
+                <button onclick="window.location.href='index.html'" class="logout-btn">На главную</button>
+                <button onclick="window.location.href='create-test.html'" class="logout-btn">Создать тест</button>
+                <button onclick="auth.handleLogout()" class="logout-btn">Выйти</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Основной контент -->
+    <div id="mainContent">
+        <div class="my-tests-container">
+            <h1>Мои тесты</h1>
+            
+            <div id="testsListContainer">
+                <div id="testsList">
+                    <!-- Тесты будут загружены здесь -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Подключаем скрипты -->
+    <script src="js/sessionStore.js"></script>
+    <script src="js/auth.js"></script>
+    
+    <script>
+        // Функция показа профиля
+        function showProfile() {
+            if (auth && auth.currentSession && auth.currentSession.userData) {
+                const user = auth.currentSession.userData;
+                let message = `👤 Профиль пользователя\n`;
+                message += `Имя: ${user.name}\n`;
+                message += `Email: ${user.email}\n`;
+                message += `ID: ${user.id}\n`;
+                message += `Провайдер: ${user.provider}\n`;
+                message += `Статус: ${auth.currentSession.status}`;
+                
+                alert(message);
+            }
+        }
+        
+        // Загрузка тестов пользователя
+        function loadMyTests() {
+            const testsList = document.getElementById('testsList');
+            if (!testsList) return;
+            
+            const myTests = JSON.parse(localStorage.getItem('myTests') || '[]');
+            const userId = localStorage.getItem('userId') || 'anonymous';
+            
+            // Фильтруем тесты текущего пользователя
+            const userTests = myTests.filter(test => test.creatorId === userId);
+            
+            if (userTests.length === 0) {
+                testsList.innerHTML = `
+                    <div class="empty-state">
+                        <h3>У вас пока нет созданных тестов</h3>
+                        <p>Создайте свой первый тест, чтобы начать работу</p>
+                        <button onclick="window.location.href='create-test.html'" class="btn-create">
+                            Создать первый тест
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Сортируем по дате создания (новые первыми)
+            userTests.sort((a, b) => b.id - a.id);
+            
+            testsList.innerHTML = userTests.map(test => `
+                <div class="test-card">
+                    <h3>${test.title}</h3>
+                    <div class="test-description">${test.description || 'Без описания'}</div>
+                    
+                    <div class="test-meta">
+                        <span class="meta-item">${test.questionsCount} вопросов</span>
+                        <span class="meta-item">${test.answersCount} вариантов</span>
+                        ${test.timeLimit ? `<span class="meta-item">${test.timeLimit} мин</span>` : ''}
+                        <span class="meta-item">Создан: ${test.createdAt}</span>
+                    </div>
+                    
+                    <div class="test-actions">
+                        <button class="action-btn btn-view" onclick="viewTestStructure(${test.id})">
+                            Посмотреть структуру
+                        </button>
+                        <button class="action-btn btn-edit" onclick="editTest(${test.id})">
+                            Редактировать
+                        </button>
+                        <button class="action-btn btn-delete" onclick="deleteTest(${test.id})">
+                            Удалить
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Просмотр структуры теста
+        function viewTestStructure(testId) {
+            const myTests = JSON.parse(localStorage.getItem('myTests') || '[]');
+            const test = myTests.find(t => t.id === testId);
+            
+            if (test) {
+                // Конвертируем в формат testQuestions
+                const testQuestionsFormat = test.questions.map(q => {
+                    return {
+                        question: q.question,
+                        answers: q.answers,
+                        correctAnswer: q.type === 'single' ? q.correctAnswer : q.correctAnswers,
+                        explanation: q.explanation,
+                        type: q.type
+                    };
+                });
+                
+                const structureText = `const testQuestions = ${JSON.stringify(testQuestionsFormat, null, 2)};`;
+                
+                // Показываем в отдельном окне
+                const newWindow = window.open();
+                newWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>Структура теста: ${test.title}</title>
+                        <style>
+                            body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+                            pre { background: white; padding: 20px; border-radius: 5px; border: 1px solid #ddd; }
+                            button { margin: 10px 5px; padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+                        </style>
+                    </head>
+                    <body>
+                        <h2>Структура теста: ${test.title}</h2>
+                        <button onclick="copyToClipboard()">Копировать в буфер</button>
+                        <button onclick="window.close()">Закрыть</button>
+                        <pre id="structure">${structureText}</pre>
+                        <script>
+                            function copyToClipboard() {
+                                const text = document.getElementById('structure').textContent;
+                                navigator.clipboard.writeText(text).then(() => {
+                                    alert('Структура теста скопирована в буфер обмена!');
+                                });
+                            }
+                        <\/script>
+                    </body>
+                    </html>
+                `);
+                
+                console.log(`=== Структура теста "${test.title}" ===`);
+                console.log(structureText);
+            }
+        }
+        
+        // Редактирование теста
+        function editTest(testId) {
+            window.location.href = `create-test.html?edit=${testId}`;
+        }
+        
+        // Удаление теста
+        function deleteTest(testId) {
+            if (confirm('Вы уверены, что хотите удалить этот тест? Это действие нельзя отменить.')) {
+                let myTests = JSON.parse(localStorage.getItem('myTests') || '[]');
+                myTests = myTests.filter(test => test.id !== testId);
+                localStorage.setItem('myTests', JSON.stringify(myTests));
+                
+                alert('Тест удален');
+                loadMyTests();
+            }
+        }
+        
+        // Обновляем статус при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Страница "Мои тесты" загружена');
+            
+            // Проверяем авторизацию
+            if (auth && auth.currentSession && auth.currentSession.status === 'authorized') {
+                document.getElementById('header').style.display = 'flex';
+                auth.updateUserUI();
+                loadMyTests();
+            } else {
+                // Если не авторизован, перенаправляем на главную
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>

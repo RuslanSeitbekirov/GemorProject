@@ -407,7 +407,7 @@
 // });
 
 
-// auth.js - локальная версия без серверной части
+// auth.js - финальная версия с исправленными перенаправлениями
 class Auth {
     constructor() {
         this.SESSION_COOKIE_NAME = 'session_token';
@@ -427,37 +427,30 @@ class Auth {
         console.log('=== Проверка сессии ===');
         const sessionToken = this.getCookie(this.SESSION_COOKIE_NAME);
         
-        // Имитация запроса к Nginx и WebClient
-        console.log('[Имитация WebClient] Проверка кук...');
-        
         if (!sessionToken) {
-            console.log('[Имитация WebClient] Кука session_token не найдена');
-            console.log('[Имитация WebClient] Ответ от Redis: ключ не существует');
+            console.log('Кука session_token не найдена');
+            console.log('Статус: Неизвестный пользователь');
             this.handleUnknownUser();
             return;
         }
         
-        console.log('[Имитация WebClient] Найден токен сессии:', sessionToken.substring(0, 20) + '...');
-        console.log('[Имитация WebClient] Запрос к Redis с ключом:', sessionToken.substring(0, 20) + '...');
+        console.log('Найден токен сессии:', sessionToken.substring(0, 20) + '...');
         
-        // Имитация запроса к Redis
+        // Имитация запроса к Redis через sessionStore
         const session = sessionStore.getSession(sessionToken);
         
         if (!session) {
-            console.log('[Имитация Redis] Такого ключа нет');
-            console.log('[Имитация WebClient] Ответ от Redis отрицательный');
+            console.log('Сессия не найдена');
             this.deleteCookie(this.SESSION_COOKIE_NAME);
             this.handleUnknownUser();
             return;
         }
         
-        console.log('[Имитация Redis] Ключ найден, статус:', session.status);
-        console.log('[Имитация WebClient] Пользователь имеет статус:', session.status);
-        
+        console.log('Сессия найдена, статус:', session.status);
         this.currentSession = { ...session, sessionToken };
         
         if (session.expiresAt < Date.now()) {
-            console.log('[Имитация Redis] Сессия истекла');
+            console.log('Сессия истекла');
             sessionStore.deleteSession(sessionToken);
             this.deleteCookie(this.SESSION_COOKIE_NAME);
             this.handleUnknownUser();
@@ -466,10 +459,16 @@ class Auth {
         
         console.log(`✓ Статус пользователя: ${session.status}`);
         
+        // ВАЖНОЕ ИЗМЕНЕНИЕ: Перенаправляем анонимных пользователей на регистрацию
         switch (session.status) {
             case 'anonymous':
-                console.log('[Имитация WebClient] Перенаправляем на страницу регистрации');
-                this.handleAnonymousUser();
+                console.log('Анонимный пользователь - перенаправляем на регистрацию');
+                // Проверяем, не находимся ли мы уже на странице регистрации
+                const currentPath = window.location.pathname;
+                if (!currentPath.includes('Registration.html') && !currentPath.includes('login.html')) {
+                    console.log('Перенаправляем на Registration.html');
+                    window.location.href = 'Registration.html';
+                }
                 break;
             case 'authorized':
                 this.handleAuthorizedUser();
@@ -482,105 +481,19 @@ class Auth {
     handleUnknownUser() {
         console.log('Обработка неизвестного пользователя');
         const path = window.location.pathname;
-        const isIndexPage = path === '/' || path.includes('index.html');
         
-        console.log('[Имитация WebClient] Текущий URL:', window.location.href);
-        
-        if (isIndexPage) {
-            console.log('[Имитация WebClient] URL / - показываем страницу авторизации');
-            this.showLoginPage();
-        } else if (path.includes('/login')) {
-            const urlParams = new URLSearchParams(window.location.search);
-            const type = urlParams.get('type');
-            
-            if (type) {
-                console.log('[Имитация WebClient] URL /login?type=' + type);
-                console.log('[Имитация WebClient] Генерация нового токена сессии и токена входа...');
-                
-                // Создаем новую сессию
-                const sessionToken = this.generateToken();
-                const loginToken = this.generateToken();
-                
-                console.log('[Имитация WebClient] Токен сессии:', sessionToken.substring(0, 20) + '...');
-                console.log('[Имитация WebClient] Токен входа:', loginToken.substring(0, 20) + '...');
-                
-                // Имитация запроса к Redis
-                console.log('[Имитация WebClient] Запрос Redis сохранить токен сессии как ключ');
-                console.log('[Имитация Redis] Запоминаю ключ:', sessionToken.substring(0, 20) + '...');
-                sessionStore.createAnonymousSession(sessionToken, loginToken);
-                
-                // Устанавливаем куку
-                console.log('[Имитация WebClient] Добавляем куку с токеном сессии');
-                this.setCookie(this.SESSION_COOKIE_NAME, sessionToken);
-                
-                // Имитация запроса к модулю Авторизации
-                console.log('[Имитация WebClient] Запрос к модулю Авторизации с токеном входа');
-                console.log('[Имитация Авторизации] Получен токен входа:', loginToken.substring(0, 20) + '...');
-                
-                // Имитация OAuth процесса
-                console.log('[Имитация Авторизации] Перенаправление на OAuth провайдера');
-                this.simulateOAuthCallback(type, loginToken, sessionToken);
-            } else {
-                console.log('[Имитация WebClient] URL /login без параметров - редирект на главную');
-                window.location.href = 'index.html';
-            }
+        if (path.includes('Registration.html') || path.includes('login.html')) {
+            // Остаемся на странице регистрации/логина
+            console.log('Находимся на странице регистрации/логина');
         } else {
-            console.log('[Имитация WebClient] Любой другой URL - редирект на главную');
-            window.location.href = 'index.html';
-        }
-    }
-    
-    handleAnonymousUser() {
-        console.log('Обработка анонимного пользователя');
-        const path = window.location.pathname;
-        const urlParams = new URLSearchParams(window.location.search);
-        
-        console.log('[Имитация WebClient] Пользователь имеет статус: Анонимный');
-        
-        if (path.includes('/login') && urlParams.get('type')) {
-            const type = urlParams.get('type');
-            
-            console.log('[Имитация WebClient] URL /login?type=' + type);
-            console.log('[Имитация WebClient] Генерация нового токена входа...');
-            
-            // Генерируем новый токен входа
-            const newLoginToken = this.generateToken();
-            
-            console.log('[Имитация WebClient] Новый токен входа:', newLoginToken.substring(0, 20) + '...');
-            console.log('[Имитация WebClient] Запрос Redis обновить токен входа');
-            console.log('[Имитация Redis] Обновляю токен входа для ключа:', this.currentSession.sessionToken.substring(0, 20) + '...');
-            
-            sessionStore.updateLoginToken(this.currentSession.loginToken, {
-                loginToken: newLoginToken,
-                updatedAt: Date.now()
-            });
-            
-            // Имитация запроса к модулю Авторизации
-            console.log('[Имитация WebClient] Запрос к модулю Авторизации (указывая токен входа)');
-            console.log('[Имитация Авторизации] Получен токен входа:', newLoginToken.substring(0, 20) + '...');
-            
-            // Перенаправляем на OAuth (имитация)
-            this.simulateOAuthCallback(type, newLoginToken, this.currentSession.sessionToken);
-        } else if (path.includes('/login')) {
-            console.log('[Имитация WebClient] URL /login без параметров');
-            console.log('[Имитация WebClient] Достаём из ответа от Redis токен входа');
-            
-            if (this.currentSession && this.currentSession.loginToken) {
-                console.log('[Имитация WebClient] Токен входа:', this.currentSession.loginToken.substring(0, 20) + '...');
-                console.log('[Имитация WebClient] Запрос модулю Авторизации отправляя токен входа для проверки');
-                
-                // Имитация проверки токена
-                this.checkLoginToken();
-            }
-        } else {
-            console.log('[Имитация WebClient] Любой другой URL - редирект на главную');
+            // Всех неизвестных пользователей перенаправляем на регистрацию
+            console.log('Перенаправляем на регистрацию');
             window.location.href = 'Registration.html';
         }
     }
     
     handleAuthorizedUser() {
         console.log('✓ Пользователь авторизован');
-        console.log('[Имитация WebClient] Пользователь имеет статус: Авторизованный');
         
         // Обновляем UI
         this.updateUserUI();
@@ -596,49 +509,25 @@ class Auth {
         const path = window.location.pathname;
         const urlParams = new URLSearchParams(window.location.search);
         
-        console.log('[Имитация WebClient] Обработка URL:', window.location.href);
-        
-        if (path.includes('/logout')) {
+        if (path.includes('logout')) {
             const allDevices = urlParams.get('all') === 'true';
-            console.log('[Имитация WebClient] URL /logout, all=' + allDevices);
             this.handleLogout(allDevices);
-        } else if (path.includes('/login')) {
-            console.log('[Имитация WebClient] URL /login - редирект на главную');
+        } else if (path.includes('login.html') || path.includes('Registration.html')) {
+            // Авторизованных пользователей с регистрационной страницы перенаправляем на главную
+            console.log('Авторизованный пользователь на странице регистрации - перенаправляем на главную');
             window.location.href = 'index.html';
         }
     }
     
     simulateOAuthCallback(provider, loginToken, sessionToken) {
-        console.log('[Имитация OAuth] Имитация процесса авторизации через', provider);
-        console.log('[Имитация OAuth] Токен входа:', loginToken.substring(0, 20) + '...');
+        console.log('Имитация процесса авторизации через', provider);
+        console.log('Токен входа:', loginToken.substring(0, 20) + '...');
         
-        // Для тестового логина (login: test, password: 1410)
-        if (provider === 'test') {
-            console.log('[Имитация OAuth] Тестовый вход - автоматическое подтверждение');
-            this.processOAuthSuccess(provider, loginToken, sessionToken);
-            return;
-        }
-        
-        // Имитация диалога OAuth
-        const confirmed = confirm(`Разрешить доступ к вашим данным ${provider}?`);
-        
-        if (confirmed) {
-            console.log('[Имитация OAuth] Пользователь нажал "Да"');
-            this.processOAuthSuccess(provider, loginToken, sessionToken);
-        } else {
-            console.log('[Имитация OAuth] Пользователь нажал "Нет"');
-            this.processOAuthDenied(loginToken);
-        }
-    }
-    
-    processOAuthSuccess(provider, loginToken, sessionToken) {
-        console.log('[Имитация OAuth] Доступ предоставлен');
-        
-        // Проверяем токен входа (имитация модуля Авторизации)
+        // Проверяем токен входа
         const tokenData = sessionStore.getLoginToken(loginToken);
         
         if (!tokenData) {
-            console.log('[Имитация Авторизации] Неопознанный токен или время действия токена закончилось');
+            console.log('Неопознанный токен или время действия токена закончилось');
             alert('Токен входа не найден или истек');
             sessionStore.deleteSession(sessionToken);
             this.deleteCookie(this.SESSION_COOKIE_NAME);
@@ -646,15 +535,14 @@ class Auth {
             return;
         }
         
-        console.log('[Имитация Авторизации] Токен валиден');
-        console.log('[Имитация WebClient] Проверяем, что в ответе присутствуют 2 JWT токена...');
+        console.log('Токен валиден');
         
-        // Генерируем JWT токены (имитация)
+        // Генерируем JWT токены
         const accessToken = this.generateJWT({ type: 'access', provider });
         const refreshToken = this.generateJWT({ type: 'refresh', provider });
         
-        console.log('[Имитация Авторизации] Access Token:', accessToken.substring(0, 20) + '...');
-        console.log('[Имитация Авторизации] Refresh Token:', refreshToken.substring(0, 20) + '...');
+        console.log('Access Token:', accessToken.substring(0, 20) + '...');
+        console.log('Refresh Token:', refreshToken.substring(0, 20) + '...');
         
         // Данные пользователя
         const userData = {
@@ -666,9 +554,7 @@ class Auth {
             provider: provider
         };
         
-        console.log('[Имитация WebClient] Меняем статус пользователя на Авторизованный');
-        console.log('[Имитация WebClient] Запрос Redis сохранить новый статус и JWT токены');
-        console.log('[Имитация Redis] Сохраняю данные для ключа:', sessionToken.substring(0, 20) + '...');
+        console.log('Меняем статус пользователя на Авторизованный');
         
         // Обновляем сессию
         sessionStore.upgradeToAuthorized(
@@ -684,7 +570,6 @@ class Auth {
         localStorage.setItem('userData', JSON.stringify(userData));
         localStorage.setItem('userState', 'authorized');
         
-        console.log('[Имитация WebClient] Продолжаем обрабатывать запрос пользователя как авторизованный');
         console.log('✓ Авторизация успешна!');
         
         // Перенаправляем на главную
@@ -692,32 +577,15 @@ class Auth {
     }
     
     processOAuthDenied(loginToken) {
-        console.log('[Имитация OAuth] В доступе отказано');
-        console.log('[Имитация WebClient] Запрос Redis удалить текущий ключ');
+        console.log('В доступе отказано');
         
         const tokenData = sessionStore.getLoginToken(loginToken);
         if (tokenData) {
-            console.log('[Имитация Redis] Удаляю ключ:', tokenData.sessionToken.substring(0, 20) + '...');
             sessionStore.deleteSession(tokenData.sessionToken);
         }
         
         this.deleteCookie(this.SESSION_COOKIE_NAME);
-        console.log('[Имитация WebClient] Редирект на главную');
         window.location.href = 'index.html';
-    }
-    
-    checkLoginToken() {
-        if (this.currentSession && this.currentSession.loginToken) {
-            const tokenData = sessionStore.getLoginToken(this.currentSession.loginToken);
-            
-            if (!tokenData) {
-                console.log('[Имитация Авторизации] Неопознанный токен');
-                console.log('[Имитация WebClient] Запрос Redis удалить текущий ключ');
-                sessionStore.deleteSession(this.currentSession.sessionToken);
-                this.deleteCookie(this.SESSION_COOKIE_NAME);
-                window.location.href = 'index.html';
-            }
-        }
     }
     
     handleLogout(allDevices = false) {
@@ -725,26 +593,20 @@ class Auth {
         const sessionToken = this.getCookie(this.SESSION_COOKIE_NAME);
         
         if (sessionToken) {
-            console.log('[Имитация WebClient] URL /logout - выход из системы');
-            console.log('[Имитация WebClient] Запрос к компоненту Redis удалить ключ');
-            console.log('[Имитация Redis] Удаляю ключ:', sessionToken.substring(0, 20) + '...');
-            
             sessionStore.deleteSession(sessionToken);
             this.deleteCookie(this.SESSION_COOKIE_NAME);
             
             if (allDevices && this.currentSession && this.currentSession.refreshToken) {
-                console.log('[Имитация WebClient] Выход со всех устройств');
-                console.log('[Имитация WebClient] Запрос к модулю Авторизации на /logout с токеном обновления');
-                console.log('[Имитация Авторизации] Получен токен обновления для инвалидации');
+                console.log('Выход со всех устройств');
             }
         }
         
         localStorage.clear();
-        console.log('[Имитация WebClient] Редирект на главную /');
         window.location.href = 'index.html';
     }
     
     showLoginPage() {
+        console.log('Показываем страницу авторизации');
         const mainContent = document.getElementById('mainContent');
         if (mainContent) {
             mainContent.innerHTML = `
@@ -774,7 +636,7 @@ class Auth {
     }
     
     showMainInterface() {
-        console.log('[Имитация WebClient] URL / - показываем личный кабинет');
+        console.log('Показываем личный кабинет');
         
         const mainContent = document.getElementById('mainContent');
         if (mainContent) {
@@ -787,101 +649,37 @@ class Auth {
                     </div>
                     
                     <div class="dashboard-actions">
-                        <button class="dashboard-btn" onclick="window.location.href='index.html?action=create_test'">
+                        <button class="dashboard-btn" onclick="window.location.href='create-test.html'">
                             📝 Создать новый тест
                         </button>
-                        <button class="dashboard-btn" onclick="window.location.href='index.html?action=my_tests'">
+                        <button class="dashboard-btn" onclick="window.location.href='my-tests.html'">
                             📚 Мои тесты
                         </button>
-                        <button class="dashboard-btn" onclick="window.location.href='../Test/Test.html'">
+                        <button class="dashboard-btn" onclick="window.location.href='take-test.html'">
                             🎯 Пройти тест
                         </button>
                     </div>
-                    
-                    <div id="testContent"></div>
                 </div>
             `;
             
-            // Загружаем создатель тестов если нужно
-            const urlParams = new URLSearchParams(window.location.search);
-            const action = urlParams.get('action');
-            
-            if (action === 'create_test') {
-                this.loadTestCreator();
-            } else if (action === 'my_tests') {
-                this.loadMyTests();
-            }
+            // Обновляем отображаемое имя
+            this.updateUserUI();
         }
         
         // Показываем шапку
         document.getElementById('header').style.display = 'flex';
     }
     
-    loadTestCreator() {
-        console.log('[Имитация WebClient] Показываем создатель тестов');
-        
-        const testContent = document.getElementById('testContent');
-        if (testContent) {
-            testContent.innerHTML = `
-                <div class="test-creator">
-                    <h2>Создание теста</h2>
-                    <div id="testCreatorContainer">
-                        <p>Для создания тестов используется отдельный модуль.</p>
-                        <button onclick="window.testCreator?.showSetup()" class="dashboard-btn">
-                            Открыть создатель тестов
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-    }
-    
-    loadMyTests() {
-        console.log('[Имитация WebClient] Загрузка списка тестов');
-        
-        const testContent = document.getElementById('testContent');
-        if (testContent) {
-            testContent.innerHTML = `
-                <div class="my-tests">
-                    <h2>Мои тесты</h2>
-                    <div id="myTestsList">
-                        <p>Тесты загружаются...</p>
-                    </div>
-                </div>
-            `;
-            
-            // Имитация запроса к Главному модулю
-            console.log('[Имитация WebClient] Запрос к Главному модулю с токеном доступа');
-            if (this.currentSession && this.currentSession.accessToken) {
-                console.log('[Имитация WebClient] Передаю токен доступа:', this.currentSession.accessToken.substring(0, 20) + '...');
-                
-                // Имитация ответа от Главного модуля
-                setTimeout(() => {
-                    if (typeof testCreator !== 'undefined') {
-                        testCreator.loadMyTests();
-                    }
-                }, 500);
-            }
-        }
-    }
-    
     startLogin(provider) {
-        console.log('[Имитация WebClient] Нажата кнопка входа через', provider);
-        console.log('[Имитация WebClient] Перенаправление на /login?type=' + provider);
-        window.location.href = `login.html?type=${provider}`;
-    }
-    
-    startTestLogin() {
-        console.log('[Имитация WebClient] Нажата кнопка тестового входа');
-        console.log('[Имитация WebClient] Перенаправление на /login?type=test');
+        console.log('Нажата кнопка входа через', provider);
         
         // Создаем сессию для анонимного пользователя
         const sessionToken = this.generateToken();
         const loginToken = this.generateToken();
         
-        console.log('[Имитация WebClient] Генерация токенов для тестового входа');
-        console.log('[Имитация WebClient] Токен сессии:', sessionToken.substring(0, 20) + '...');
-        console.log('[Имитация WebClient] Токен входа:', loginToken.substring(0, 20) + '...');
+        console.log('Генерация токенов для входа через', provider);
+        console.log('Токен сессии:', sessionToken.substring(0, 20) + '...');
+        console.log('Токен входа:', loginToken.substring(0, 20) + '...');
         
         // Сохраняем в sessionStore
         sessionStore.createAnonymousSession(sessionToken, loginToken);
@@ -889,8 +687,39 @@ class Auth {
         // Устанавливаем куку
         this.setCookie(this.SESSION_COOKIE_NAME, sessionToken);
         
-        // Имитируем успешную авторизацию
-        this.simulateOAuthCallback('test', loginToken, sessionToken);
+        // Имитируем OAuth процесс
+        this.simulateOAuthProcess(provider, loginToken, sessionToken);
+    }
+    
+    simulateOAuthProcess(provider, loginToken, sessionToken) {
+        console.log('Имитация OAuth процесса через', provider);
+        
+        // Для тестового входа - автоматическая авторизация
+        if (provider === 'test') {
+            console.log('Тестовый вход - автоматическое подтверждение');
+            this.simulateOAuthCallback(provider, loginToken, sessionToken);
+            return;
+        }
+        
+        // Для Yandex и GitHub - имитация подтверждения
+        console.log('Имитация диалога подтверждения OAuth');
+        const confirmed = confirm(`Разрешить доступ к вашим данным через ${provider}?`);
+        
+        if (confirmed) {
+            console.log('Пользователь разрешил доступ');
+            this.simulateOAuthCallback(provider, loginToken, sessionToken);
+        } else {
+            console.log('Пользователь отказал в доступе');
+            this.processOAuthDenied(loginToken);
+        }
+    }
+    
+    startTestLogin() {
+        console.log('Нажата кнопка тестового входа');
+        
+        // Просто перенаправляем на страницу регистрации
+        // Там уже есть логика для тестового входа
+        window.location.href = 'Registration.html';
     }
     
     updateUserUI() {

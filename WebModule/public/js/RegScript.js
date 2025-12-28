@@ -1,142 +1,4 @@
-// // RegScript.js - обновленный
-// const loginButton = document.querySelector('.loginButton');
-// const loginButtonYandex = document.querySelector('.loginButtonYandex');
-// const loginButtonGithub = document.querySelector('.loginButtonGithub');
-
-// // Функция для тестового входа
-// function performTestLogin(login, password) {
-//     if (login === "test" && password === "1410") {
-//         // Создаем сессию
-//         const sessionToken = 'session_' + Date.now();
-//         const loginToken = 'login_' + Date.now();
-        
-//         // Сохраняем в sessionStore
-//         if (typeof sessionStore !== 'undefined') {
-//             sessionStore.createAnonymousSession(sessionToken, loginToken);
-            
-//             // Устанавливаем куку
-//             document.cookie = `session_token=${sessionToken}; path=/; max-age=604800`;
-            
-//             // Имитируем успешную авторизацию
-//             simulateOAuthSuccess('test', loginToken, sessionToken);
-//         } else {
-//             alert('Ошибка: sessionStore не загружен');
-//         }
-//         return true;
-//     }
-//     return false;
-// }
-
-// function showAccountNotFoundDialog(email, password) {
-//     // Реализация диалога из предыдущего ответа
-//     const dialogHTML = `
-//         <div class="account-not-found-modal">
-//             <div class="modal-content">
-//                 <h3>Аккаунт не найден</h3>
-//                 <p>Аккаунт с email "${email}" не существует.</p>
-//                 <div class="modal-buttons">
-//                     <button id="create-new-btn" class="btn btn-primary">Создать новый</button>
-//                     <button id="try-again-btn" class="btn btn-secondary">Попробовать снова</button>
-//                 </div>
-//             </div>
-//         </div>
-//     `;
-    
-//     // Добавить отображение модального окна
-// }
-
-// function simulateOAuthSuccess(provider, loginToken, sessionToken) {
-//     // Генерируем JWT токены
-//     const accessToken = 'access_' + Date.now();
-//     const refreshToken = 'refresh_' + Date.now();
-    
-//     const userData = {
-//         id: 'test_user_123',
-//         name: 'Тестовый пользователь',
-//         email: 'test@example.com',
-//         provider: 'test'
-//     };
-    
-//     // Обновляем сессию
-//     sessionStore.upgradeToAuthorized(sessionToken, accessToken, refreshToken, userData);
-    
-//     // Сохраняем в localStorage
-//     localStorage.setItem('userId', userData.id);
-//     localStorage.setItem('username', userData.name);
-//     localStorage.setItem('userData', JSON.stringify(userData));
-    
-//     // Перенаправляем
-//     window.location.href = '../General/index.html';
-// }
-
-// // Обработка выбора метода авторизации
-// document.addEventListener('DOMContentLoaded', function() {
-//     setupAuthButtons();
-// });
-
-// function setupAuthButtons() {
-//     document.getElementById('login-form')?.addEventListener('submit', function(e) {
-//         e.preventDefault();
-//         const email = document.getElementById('email').value;
-//         const password = document.getElementById('password').value;
-        
-//         // В реальности здесь будет запрос к API
-//         console.log('Попытка входа:', email);
-        
-//         // Симуляция проверки
-//         setTimeout(() => {
-//             const users = JSON.parse(localStorage.getItem('users') || '[]');
-//             const user = users.find(u => u.email === email && u.password === password);
-            
-//             if (user) {
-//                 // Успешный вход
-//                 localStorage.setItem('userState', 'authorized');
-//                 localStorage.setItem('currentUser', JSON.stringify(user));
-//                 window.location.href = 'index.html';
-//             } else {
-//                 // Показываем диалог "Аккаунт не найден"
-//                 showAccountNotFoundDialog(email, password);
-//             }
-//         }, 1000);
-//     });
-// }
-
-// // Обработчики OAuth
-// loginButtonYandex.addEventListener('click', () => {
-//     window.location.href = '../General/login.html?type=yandex';
-// });
-
-// loginButtonGithub.addEventListener('click', () => {
-//     window.location.href = '../General/login.html?type=github';
-// });
-
-// // Обработка Enter
-// document.getElementById('password').addEventListener('keypress', (e) => {
-//     if (e.key === 'Enter') {
-//         loginButton.click();
-//     }
-// });
-
-// // Проверяем, если пользователь уже авторизован
-// window.addEventListener('DOMContentLoaded', () => {
-//     const sessionToken = getCookie('session_token');
-//     if (sessionToken && typeof sessionStore !== 'undefined') {
-//         const session = sessionStore.getSession(sessionToken);
-//         if (session && session.status === 'authorized') {
-//             window.location.href = '../General/index.html';
-//         }
-//     }
-// });
-
-// function getCookie(name) {
-//     const value = `; ${document.cookie}`;
-//     const parts = value.split(`; ${name}=`);
-//     if (parts.length === 2) return parts.pop().split(';').shift();
-//     return null;
-// }
-
-
-// RegScript.js - упрощенная версия для тестового входа
+// RegScript.js - обновленная версия для работы с тестовыми данными
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Registration page loaded');
     
@@ -144,23 +6,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginButtonYandex = document.querySelector('.loginButtonYandex');
     const loginButtonGithub = document.querySelector('.loginButtonGithub');
     
-    // Заменяем Yandex ID на GitHub на кнопке
-    const githubButton = document.querySelector('.loginButtonGithub');
-    if (githubButton) {
-        githubButton.innerHTML = '<img src="img/YandexID.png" alt="Иконка" class="Yandex-icon"> Войти c GitHub';
-    }
-    
     // Проверяем, если пользователь уже авторизован
     checkExistingSession();
     
     // Обработчик для тестового входа
     loginButton.addEventListener('click', function() {
-        console.log('Нажата кнопка "Войти"');
+        console.log('=== Попытка входа ===');
         
         const login = document.getElementById('login').value;
         const password = document.getElementById('password').value;
         
-        console.log('Введены данные:', { login, password: '***' });
+        console.log('Введены данные:', { login, password: password ? '***' : '(пусто)' });
         
         // Проверяем тестовый логин
         if (login === "test" && password === "1410") {
@@ -206,14 +62,32 @@ document.addEventListener('DOMContentLoaded', function() {
     // Обработчики OAuth кнопок
     loginButtonYandex.addEventListener('click', function() {
         console.log('Нажата кнопка Яндекс ID');
-        console.log('[Имитация] Перенаправление на OAuth Яндекс');
-        window.location.href = 'login.html?type=yandex';
+        console.log('[Имитация] Создание анонимной сессии для OAuth...');
+        
+        // Создаем сессию для анонимного пользователя
+        const sessionToken = 'session_' + Date.now();
+        const loginToken = 'login_' + Date.now();
+        
+        sessionStore.createAnonymousSession(sessionToken, loginToken);
+        document.cookie = `session_token=${sessionToken}; path=/; max-age=604800`;
+        
+        // Имитируем OAuth процесс для Яндекс
+        simulateOAuthProcess('yandex', loginToken, sessionToken);
     });
     
     loginButtonGithub.addEventListener('click', function() {
         console.log('Нажата кнопка GitHub');
-        console.log('[Имитация] Перенаправление на OAuth GitHub');
-        window.location.href = 'login.html?type=github';
+        console.log('[Имитация] Создание анонимной сессии для OAuth...');
+        
+        // Создаем сессию для анонимного пользователя
+        const sessionToken = 'session_' + Date.now();
+        const loginToken = 'login_' + Date.now();
+        
+        sessionStore.createAnonymousSession(sessionToken, loginToken);
+        document.cookie = `session_token=${sessionToken}; path=/; max-age=604800`;
+        
+        // Имитируем OAuth процесс для GitHub
+        simulateOAuthProcess('github', loginToken, sessionToken);
     });
     
     // Обработка Enter в поле пароля
@@ -233,7 +107,7 @@ function checkExistingSession() {
         const session = sessionStore.getSession(sessionToken);
         if (session && session.status === 'authorized') {
             console.log('Пользователь уже авторизован, перенаправляем...');
-            window.location.href = '../General/index.html';
+            window.location.href = 'index.html';
         } else if (session && session.status === 'anonymous') {
             console.log('Пользователь анонимный, остаемся на странице регистрации');
         }
@@ -354,8 +228,25 @@ function createNewAccount(email, password) {
         
         // Перенаправляем на главную
         setTimeout(() => {
-            window.location.href = '../General/index.html';
+            window.location.href = 'index.html';
         }, 1000);
+    }
+}
+
+function simulateOAuthProcess(provider, loginToken, sessionToken) {
+    console.log('[Имитация] Запуск OAuth процесса для', provider);
+    
+    // Имитация подтверждения OAuth
+    const confirmed = confirm(`Разрешить доступ к вашим данным через ${provider}?`);
+    
+    if (confirmed) {
+        simulateOAuthSuccess(provider, loginToken, sessionToken);
+    } else {
+        console.log('[Имитация] Пользователь отказал в доступе');
+        
+        // Удаляем сессию
+        sessionStore.deleteSession(sessionToken);
+        document.cookie = `session_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
     }
 }
 
@@ -370,11 +261,16 @@ function simulateOAuthSuccess(provider, loginToken, sessionToken) {
     console.log('  - Access Token:', accessToken);
     console.log('  - Refresh Token:', refreshToken);
     
-    const userData = {
+    const userData = provider === 'test' ? {
         id: 'test_user_123',
         name: 'Тестовый пользователь',
         email: 'test@example.com',
         provider: 'test'
+    } : {
+        id: `${provider}_user_${Date.now()}`,
+        name: provider === 'yandex' ? 'Яндекс Пользователь' : 'GitHub Пользователь',
+        email: `${provider}_user@example.com`,
+        provider: provider
     };
     
     // Обновляем сессию
@@ -395,7 +291,7 @@ function simulateOAuthSuccess(provider, loginToken, sessionToken) {
     
     // Перенаправляем
     setTimeout(() => {
-        window.location.href = '../General/index.html';
+        window.location.href = 'index.html';
     }, 1000);
 }
 
