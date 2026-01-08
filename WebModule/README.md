@@ -16,6 +16,29 @@
     Регистрация в базе, авторизация.
     Сохранение тестов в базе.
 
+    Структура проекта:
+    project/
+        ├── index.html
+        ├── Registration.html
+        ├── create-test.html
+        ├── my-tests.html
+        ├── take-test.html
+        ├── Test.html
+        ├── css/
+        │   ├── RegStyle.css
+        │   ├── TestStyle.css
+        │   └── GENstyle.css
+        ├── js/
+        │   ├── sessionStore.js
+        │   ├── auth.js
+        │   ├── RegScript.js
+        │   ├── testCreator.js
+        │   └── test_main.js
+        └── img/
+            ├── Prof.jpg
+            ├── YandexID.png
+            └── github.png
+
 <h1>Alfa 1.9</h1>
 
 На стадии доработки
