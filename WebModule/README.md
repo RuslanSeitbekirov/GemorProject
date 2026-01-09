@@ -1,3 +1,39 @@
+<h1>Alfa 1.9.3 - Alfa 1.9.4</h1>
+Сайт был запущен на локальном сервере в Docker контейнере.
+WEBMODULE/
+    .vscode/ task.json
+    node_modules/ *1000+ файлов*    
+    project/
+        ├── index.html
+        ├── Registration.html
+        ├── create-test.html
+        ├── my-tests.html
+        ├── take-test.html
+        ├── Test.html
+        ├── css/
+        │   ├── RegStyle.css
+        │   ├── TestStyle.css
+        │   └── GENstyle.css
+        ├── js/
+        │   ├── sessionStore.js
+        │   ├── auth.js
+        │   ├── RegScript.js
+        │   ├── testCreator.js
+        │   └── test_main.js
+        └── img/
+            ├── Prof.jpg
+            ├── YandexID.png
+            └── github.png
+    Сценарии.md
+    docker-compose.yml
+    package-lock.json
+    package.json
+    README.md
+    server-old.js
+    server.js
+
+
+
 <h1>Alfa 1.9.2</h1>
 Поправлены биги связаные с обработкой имитации деятельности. В основном для страницы регистрации
 Проблема была в пути к js файлам отсутвовал указатель на папку.

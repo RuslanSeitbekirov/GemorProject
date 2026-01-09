@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Автоматический фокус на поле логина
     if (loginInput) loginInput.focus();
     
-    loginButton.addEventListener('click', handleLogin);
+    loginButton.addEventListener('click', handleLogin); 
     
     // Обработка Enter
     passwordInput.addEventListener('keypress', function(e) {

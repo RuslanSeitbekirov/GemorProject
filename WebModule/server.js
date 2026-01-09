@@ -17,7 +17,7 @@ app.use(express.static('public'));
 const poolConfig = {
     host: 'localhost',
     port: 5438,
-    database: 'postgres',
+    database: 'postgres',  // Используем стандартную базу
     user: 'postgres',
     password: '12345',
     max: 10,
@@ -58,11 +58,26 @@ async function initDatabase() {
         
         // Создаем базу данных если её нет
         const mainPool = new Pool(poolConfig);
-        await mainPool.query(`
-            SELECT 'CREATE DATABASE test_system'
-            WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'test_system')
-        `);
-        await mainPool.end();
+        try {
+            console.log('📝 Creating database "test_system" if not exists...');
+            await mainPool.query(`
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'test_system') THEN
+                        CREATE DATABASE test_system;
+                        RAISE NOTICE 'Database test_system created';
+                    ELSE
+                        RAISE NOTICE 'Database test_system already exists';
+                    END IF;
+                END
+                $$;
+            `);
+            console.log('✅ Database check completed');
+        } catch (error) {
+            console.error('❌ Error creating database:', error.message);
+        } finally {
+            await mainPool.end();
+        }
         
         // Подключаемся к базе test_system
         const dbPool = new Pool({
@@ -71,8 +86,17 @@ async function initDatabase() {
         });
         
         // Проверяем подключение к новой базе
-        await dbPool.query('SELECT NOW()');
-        console.log('✅ Connected to test_system database');
+        try {
+            await dbPool.query('SELECT NOW()');
+            console.log('✅ Connected to test_system database');
+        } catch (error) {
+            console.error('❌ Cannot connect to test_system:', error.message);
+            console.log('   Trying to create tables in default database instead...');
+            // Если не можем подключиться к test_system, используем postgres
+            const fallbackPool = new Pool(poolConfig);
+            await createTables(fallbackPool);
+            return fallbackPool;
+        }
         
         // Создаем таблицы
         await createTables(dbPool);
@@ -82,14 +106,25 @@ async function initDatabase() {
         
     } catch (error) {
         console.error('❌ Database initialization failed:', error.message);
+        console.log('⚠️ Switching to demo mode...');
         return null;
     }
 }
 
 async function createTables(dbPool) {
+    // Создаем схему если её нет
+    await dbPool.query(`
+        CREATE SCHEMA IF NOT EXISTS test_system;
+    `);
+    
+    // Устанавливаем путь поиска
+    await dbPool.query(`
+        SET search_path TO test_system, public;
+    `);
+    
     // Таблица пользователей
     await dbPool.query(`
-        CREATE TABLE IF NOT EXISTS users (
+        CREATE TABLE IF NOT EXISTS test_system.users (
             id SERIAL PRIMARY KEY,
             email VARCHAR(255) UNIQUE NOT NULL,
             username VARCHAR(100),
