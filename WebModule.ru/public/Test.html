@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>"название теста"</title>
+        <link rel="stylesheet" href="css/TestStyle.css" />
+    </head>
+    <body>
+        <main>
+            <section class="test">
+                <div class="base">
+                    <div class="wrapper base-flex-container">
+                        <nav class="bread-crumbs">
+                            <ol class="bread-crumbs-list">
+                                <li class="bread-crumbs-item"><a href="#"></a></li>
+                                <li class="bread-crumbs-item"><img src="img/arrow-right.svg" alt="arrow-right" /></li>
+                                <li class="bread-crumbs-item"></li>
+                            </ol>
+                        </nav>
+
+                        <div class="headers">
+                            <h1></h1>
+                            <h2></h2>
+                        </div>
+
+                        <div class="question-container">
+                            <p class="question-title"></p>
+                            <ul class="answers-list">
+                                <li class="answer-item"><input type="radio" name="question1" id="answer1" value="" checked /><label for="answer1"> </label></li>
+                                <li class="answer-item"><input type="radio" name="question1" id="answer2" value="" /><label for="answer2"> </label></li>
+                                <li class="answer-item"><input type="radio" name="question1" id="answer3" value="" /><label for="answer3"> </label></li>
+                                <li class="answer-item"><input type="radio" name="question1" id="answer4" value="" /><label for="answer4"> </label></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-panel">
+                    <div class="wrapper info-panel-flex-container">
+                        <time class="timer"></time>
+                        <div class="question-counter"><span id="currentQuestion">1</span>/ 15</div>
+                        <button class="next-button">Ответить<img src="img/arrow-right-white.svg" alt="next-button-arrow" /></button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <script src="js/test_main.js"></script>
+    </body>
+</html>
