@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход или Регистрация</title>
+    <link rel="stylesheet" href="css/RegStyle.css">
+</head> 
+<body> 
+    <div class="sign-in"> 
+        Логин<br> 
+        <input type="text" id = "login"><br>
+        Пароль<br>
+        <input type="password" id = "password"><br>
+        <input  class="loginButton" type="button" value="Войти">
+        <hr>
+        <h4 align="center">Другие способы</h4>
+        <div>
+            <button class="loginButtonYandex">
+                <img src="img/YandexID.png" alt="Иконка" class="Yandex-icon">
+                Войти с ЯндексID
+            </button>
+
+            <button class="loginButtonGithub">
+                <img src="img/YandexID.png" alt="Иконка" class="Yandex-icon">
+                Войти c GitHub
+            </button>
+           
+        </div>
+    </div>
+    <script src="js/RegScript.js"> </script>
+    <script src="js/sessionStore.js"> </script>
+    <script src="js/auth.js"> </script>
+        
+
+</body>
+</html> 
