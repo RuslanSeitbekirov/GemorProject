@@ -1,9 +1,7 @@
 <h1>Alfa 1.9.3 - Alfa 1.9.4</h1>
 Сайт был запущен на локальном сервере в Docker контейнере.
-WEBMODULE/
-    .vscode/ task.json
-    node_modules/ *1000+ файлов*    
-    project/
+GemorProject/  
+    public/
         ├── index.html
         ├── Registration.html
         ├── create-test.html
