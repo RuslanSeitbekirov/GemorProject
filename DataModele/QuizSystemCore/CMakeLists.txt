@@ -53,66 +53,21 @@ message(STATUS "✅ nlohmann_json найден")
 # СОЗДАЕМ ИСПОЛНЯЕМЫЙ ФАЙЛ
 # ============================================
 
-add_executable(quiz_system_core)
+# ============================================
+# МИНИМАЛЬНЫЙ РАБОЧИЙ ВАРИАНТ
+# ============================================
 
-# Ищем исходные файлы
-file(GLOB_RECURSE SOURCE_FILES "src/*.cpp")
+# Просто добавляем файлы
+add_executable(quiz_system_core
+    src/main.cpp
+    src/core/Application.cpp
+    src/core/HttpServer.cpp
+    src/utils/Logger.cpp
+    src/utils/ConfigLoader.cpp
+    src/database/DatabaseManager.cpp
+)
 
-if(SOURCE_FILES)
-    message(STATUS "📄 Найдено файлов: ${SOURCE_FILES}")
-    target_sources(quiz_system_core PRIVATE ${SOURCE_FILES})
-else()
-    # Создаем минимальный пример
-    message(STATUS "📄 Создаю минимальный пример...")
-    
-    file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/src/minimal.cpp
-        "#include <iostream>\n"
-        "#include <cpprest/http_listener.h>\n"
-        "#include <cpprest/json.h>\n"
-        "\n"
-        "using namespace web;\n"
-        "using namespace web::http;\n"
-        "using namespace web::http::experimental::listener;\n"
-        "\n"
-        "void handle_get(http_request request) {\n"
-        "    json::value response;\n"
-        "    response[U(\"message\")] = json::value::string(U(\"Hello from Quiz System!\"));\n"
-        "    response[U(\"status\")] = json::value::string(U(\"success\"));\n"
-        "    \n"
-        "    request.reply(status_codes::OK, response);\n"
-        "}\n"
-        "\n"
-        "int main() {\n"
-        "    std::cout << \"🚀 Запуск Quiz System Core...\" << std::endl;\n"
-        "    \n"
-        "    // Создаем HTTP listener\n"
-        "    http_listener listener(U(\"http://localhost:8080\"));\n"
-        "    listener.support(methods::GET, handle_get);\n"
-        "    \n"
-        "    try {\n"
-        "        // Запускаем listener\n"
-        "        listener.open().wait();\n"
-        "        std::cout << \"✅ Сервер запущен на http://localhost:8080\" << std::endl;\n"
-        "        std::cout << \"📌 Нажмите Enter для остановки...\" << std::endl;\n"
-        "        \n"
-        "        // Ждем нажатия Enter\n"
-        "        std::cin.get();\n"
-        "        \n"
-        "        // Останавливаем listener\n"
-        "        listener.close().wait();\n"
-        "        std::cout << \"👋 Сервер остановлен\" << std::endl;\n"
-        "        \n"
-        "    } catch (const std::exception& e) {\n"
-        "        std::cerr << \"❌ Ошибка: \" << e.what() << std::endl;\n"
-        "        return 1;\n"
-        "    }\n"
-        "    \n"
-        "    return 0;\n"
-        "}\n"
-    )
-    
-    target_sources(quiz_system_core PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/minimal.cpp)
-endif()
+message(STATUS "✅ Исполняемый файл создан")
 
 # ============================================
 # НАСТРОЙКА ВКЛЮЧЕНИЙ И БИБЛИОТЕК

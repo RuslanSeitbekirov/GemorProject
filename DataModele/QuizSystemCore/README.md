@@ -9,7 +9,10 @@
 - bin/ - исполняемые файлы
 - build/ - файлы сборки
 
-## ыстрый старт
-1. астройте : setup-db-simple.bat
+## Быстрый старт
+1. Настройте : setup-db-simple.bat
 2. Соберите: mkdir build && cd build && cmake .. && cmake --build .
-3. апустите: bin\quiz_system_core.exe
+3. Запустите: bin\quiz_system_core.exe
+
+Исправить логер.цпп там херня какая то
+шаг 3.2.4

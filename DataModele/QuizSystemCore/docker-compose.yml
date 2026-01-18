@@ -1,0 +1,175 @@
+version: '3.8'
+
+services:
+  # PostgreSQL база данных
+  postgres:
+    image: postgres:15-alpine
+    container_name: quiz-postgres
+    environment:
+      POSTGRES_DB: quiz_system
+      POSTGRES_USER: quiz_app
+      POSTGRES_PASSWORD: QuizAppPassword123!
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=ru_RU.UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/scripts:/docker-entrypoint-initdb.d
+    networks:
+      - quiz-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quiz_app -d quiz_system"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # PGAdmin для управления базой данных
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: quiz-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@quizsystem.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - quiz-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Основное приложение (разработка)
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    container_name: quiz-app-dev
+    ports:
+      - "8080:8080"    # HTTP API
+      - "9229:9229"    # Debug port
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=quiz_system
+      - DB_USER=quiz_app
+      - DB_PASS=QuizAppPassword123!
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/build
+    networks:
+      - quiz-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      sh -c "
+      echo '🚀 Настройка среды разработки...' &&
+      cmake -S /app -B /app/build \
+        -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake \
+        -DCMAKE_BUILD_TYPE=Debug &&
+      cmake --build /app/build --target quiz_system_core --parallel $(nproc) &&
+      echo '🚀 Запуск сервера...' &&
+      /app/build/bin/quiz_system_core
+      "
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+  # Приложение (production)
+  app-prod:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod
+    container_name: quiz-app-prod
+    ports:
+      - "8081:8080"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=quiz_system
+      - DB_USER=quiz_app
+      - DB_PASS=QuizAppPassword123!
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+    networks:
+      - quiz-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["./quiz_system_core"]
+    restart: unless-stopped
+
+  # Redis для кэширования (опционально)
+  redis:
+    image: redis:7-alpine
+    container_name: quiz-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - quiz-network
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+
+  # Мониторинг с Prometheus и Grafana
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: quiz-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - quiz-network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: quiz-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - quiz-network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+# Сети
+networks:
+  quiz-network:
+    driver: bridge
+    name: quiz-network
+
+# Тома для persistent данных
+volumes:
+  postgres_data:
+    name: quiz-postgres-data
+  pgadmin_data:
+    name: quiz-pgadmin-data
+  redis_data:
+    name: quiz-redis-data
+  prometheus_data:
+    name: quiz-prometheus-data
+  grafana_data:
+    name: quiz-grafana-data

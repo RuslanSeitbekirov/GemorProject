@@ -1,0 +1,92 @@
+# Multi-stage Dockerfile для production
+# Stage 1: Сборка
+FROM ubuntu:22.04 as builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Установка инструментов сборки
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    libssl-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# Установка vcpkg
+RUN git clone https://github.com/microsoft/vcpkg.git /opt/vcpkg && \
+    /opt/vcpkg/bootstrap-vcpkg.sh
+
+# Установка зависимостей
+RUN /opt/vcpkg/vcpkg install \
+    cpprestsdk \
+    libpq \
+    openssl \
+    jsoncpp \
+    spdlog \
+    fmt \
+    boost-system \
+    nlohmann-json
+
+# Настройка окружения
+ENV VCPKG_ROOT=/opt/vcpkg
+ENV PATH="$VCPKG_ROOT:$PATH"
+
+WORKDIR /app
+
+# Копирование исходного кода
+COPY . .
+
+# Сборка в Release режиме
+RUN mkdir -p build && \
+    cd build && \
+    cmake .. \
+        -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_TESTS=OFF && \
+    cmake --build . --config Release --parallel $(nproc)
+
+# Stage 2: Runtime
+FROM ubuntu:22.04 as runtime
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Установка только runtime зависимостей
+RUN apt-get update && apt-get install -y \
+    # Runtime библиотеки
+    libssl3 \
+    libpq5 \
+    # Системные утилиты
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Создание пользователя для безопасности
+RUN groupadd -r quizapp && useradd -r -g quizapp quizapp
+
+# Создание директорий
+RUN mkdir -p /app /app/logs /app/config
+RUN chown -R quizapp:quizapp /app
+
+# Копирование исполняемых файлов из builder stage
+COPY --from=builder /app/build/bin/quiz_system_core /app/
+COPY --from=builder /app/config/production.json /app/config/
+COPY --from=builder /app/database/scripts/ /app/database/scripts/
+
+# Копирование зависимостей
+COPY --from=builder /opt/vcpkg/installed/x64-linux/lib/ /usr/local/lib/
+
+# Настройка прав
+RUN chmod +x /app/quiz_system_core
+RUN chown -R quizapp:quizapp /app
+
+# Переключение на non-root пользователя
+USER quizapp
+
+WORKDIR /app
+
+# Открытие порта
+EXPOSE 8080
+
+# Команда запуска
+CMD ["./quiz_system_core"]

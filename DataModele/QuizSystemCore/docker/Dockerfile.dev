@@ -1,0 +1,83 @@
+# Dockerfile для разработки Quiz System Core
+# Используется для локальной разработки и тестирования
+
+# Базовый образ с Ubuntu и инструментами разработки
+FROM ubuntu:22.04 as development
+
+# Установка переменных окружения для избежания интерактивных запросов
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Europe/Moscow
+
+# Установка системных зависимостей
+RUN apt-get update && apt-get install -y \
+    # Инструменты сборки
+    build-essential \
+    cmake \
+    ninja-build \
+    pkg-config \
+    # Системные утилиты
+    git \
+    wget \
+    curl \
+    software-properties-common \
+    # Библиотеки для PostgreSQL
+    libpq-dev \
+    postgresql-client \
+    # Библиотеки для SSL
+    libssl-dev \
+    # Инструменты отладки
+    gdb \
+    valgrind \
+    # Python для скриптов
+    python3 \
+    python3-pip \
+    # Дополнительные инструменты
+    clang-format \
+    clang-tidy \
+    doxygen \
+    graphviz \
+    && rm -rf /var/lib/apt/lists/*
+
+# Установка vcpkg
+RUN git clone https://github.com/microsoft/vcpkg.git /opt/vcpkg && \
+    /opt/vcpkg/bootstrap-vcpkg.sh
+
+# Установка зависимостей через vcpkg
+RUN /opt/vcpkg/vcpkg install \
+    cpprestsdk \
+    libpq \
+    openssl \
+    jsoncpp \
+    spdlog \
+    fmt \
+    boost-system \
+    nlohmann-json \
+    gtest
+
+# Настройка окружения
+ENV VCPKG_ROOT=/opt/vcpkg
+ENV PATH="$VCPKG_ROOT:$PATH"
+ENV CC=/usr/bin/gcc
+ENV CXX=/usr/bin/g++
+
+# Создание рабочей директории
+WORKDIR /app
+
+# Копирование файлов проекта
+COPY . .
+
+# Сборка проекта
+RUN mkdir -p build && \
+    cd build && \
+    cmake .. \
+        -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake \
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DBUILD_TESTS=ON && \
+    cmake --build . --parallel $(nproc)
+
+# Открытие портов
+EXPOSE 8080  # HTTP API
+EXPOSE 9229  # Debug port
+
+# Команда по умолчанию
+CMD ["bash"]

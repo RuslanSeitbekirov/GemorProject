@@ -1,6 +1,7 @@
 # CMake generation dependency list for this directory.
 C:/Program Files/CMake/share/cmake-4.2/Modules/CMakeCXXInformation.cmake
 C:/Program Files/CMake/share/cmake-4.2/Modules/CMakeCommonLanguageInclude.cmake
+C:/Program Files/CMake/share/cmake-4.2/Modules/CMakeDependentOption.cmake
 C:/Program Files/CMake/share/cmake-4.2/Modules/CMakeFindDependencyMacro.cmake
 C:/Program Files/CMake/share/cmake-4.2/Modules/CMakeGenericSystem.cmake
 C:/Program Files/CMake/share/cmake-4.2/Modules/CMakeInitializeConfigs.cmake
@@ -49,6 +50,7 @@ C:/vcpkg/installed/x64-windows/share/fmt/fmt-targets.cmake
 C:/vcpkg/installed/x64-windows/share/nlohmann_json/nlohmann_jsonConfig.cmake
 C:/vcpkg/installed/x64-windows/share/nlohmann_json/nlohmann_jsonConfigVersion.cmake
 C:/vcpkg/installed/x64-windows/share/nlohmann_json/nlohmann_jsonTargets.cmake
+C:/vcpkg/installed/x64-windows/share/openssl/vcpkg-cmake-wrapper.cmake
 C:/vcpkg/installed/x64-windows/share/spdlog/spdlogConfig.cmake
 C:/vcpkg/installed/x64-windows/share/spdlog/spdlogConfigTargets-debug.cmake
 C:/vcpkg/installed/x64-windows/share/spdlog/spdlogConfigTargets-release.cmake
@@ -57,3 +59,5 @@ C:/vcpkg/installed/x64-windows/share/spdlog/spdlogConfigVersion.cmake
 C:/vcpkg/installed/x64-windows/share/unofficial-brotli/unofficial-brotli-config-debug.cmake
 C:/vcpkg/installed/x64-windows/share/unofficial-brotli/unofficial-brotli-config-release.cmake
 C:/vcpkg/installed/x64-windows/share/unofficial-brotli/unofficial-brotli-config.cmake
+C:/vcpkg/installed/x64-windows/share/zlib/vcpkg-cmake-wrapper.cmake
+C:/vcpkg/scripts/buildsystems/vcpkg.cmake

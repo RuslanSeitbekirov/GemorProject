@@ -4,6 +4,21 @@
     <ClCompile Include="C:\pp\GemorProject\DataModele\QuizSystemCore\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\pp\GemorProject\DataModele\QuizSystemCore\src\core\Application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\pp\GemorProject\DataModele\QuizSystemCore\src\core\HttpServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\pp\GemorProject\DataModele\QuizSystemCore\src\utils\Logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\pp\GemorProject\DataModele\QuizSystemCore\src\utils\ConfigLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\pp\GemorProject\DataModele\QuizSystemCore\src\database\DatabaseManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="C:\pp\GemorProject\DataModele\QuizSystemCore\CMakeLists.txt" />
