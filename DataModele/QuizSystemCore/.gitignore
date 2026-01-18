@@ -1,0 +1,20 @@
+﻿# Сборка
+build/
+bin/
+*.exe
+*.obj
+*.pdb
+
+# азы данных
+*.db
+*.sqlite
+
+# оги
+logs/
+*.log
+
+# IDE
+.vs/
+.vscode/
+*.sln
+*.vcxproj

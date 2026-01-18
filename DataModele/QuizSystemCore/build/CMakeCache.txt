@@ -17,11 +17,17 @@
 //Build documentation
 BUILD_DOCS:BOOL=OFF
 
+//No help, variable specified on the command line.
+BUILD_SHARED_LIBS:UNINITIALIZED=OFF
+
 //Build tests
 BUILD_TESTS:BOOL=ON
 
 //Path to a program.
 CMAKE_AR:FILEPATH=C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.40.33807/bin/Hostx64/x64/lib.exe
+
+//No help, variable specified on the command line.
+CMAKE_BUILD_TYPE:UNINITIALIZED=Debug
 
 //Semicolon separated list of supported configuration types, only
 // supports Debug, Release, MinSizeRel, and RelWithDebInfo, anything
@@ -60,6 +66,9 @@ CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=/INCREMENTAL:NO
 
 //Flags used by the linker during RELWITHDEBINFO builds.
 CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO:STRING=/debug /INCREMENTAL
+
+//No help, variable specified on the command line.
+CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
 
 //Value Computed by CMake.
 CMAKE_FIND_PACKAGE_REDIRECTS_DIR:STATIC=C:/pp/GemorProject/DataModele/QuizSystemCore/build/CMakeFiles/pkgRedirects
@@ -188,6 +197,9 @@ CMAKE_STATIC_LINKER_FLAGS_RELEASE:STRING=
 // during RELWITHDEBINFO builds.
 CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
+//No help, variable specified on the command line.
+CMAKE_TOOLCHAIN_FILE:UNINITIALIZED=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+
 //If this value is on, makefiles will be generated without the
 // .SILENT directive, and all commands will be echoed to the console
 // during the make.  This is useful for debugging only. With Visual
@@ -208,6 +220,9 @@ OPENSSL_APPLINK_SOURCE:FILEPATH=C:/vcpkg/installed/x64-windows/include/openssl/a
 
 //Path to a file.
 OPENSSL_INCLUDE_DIR:PATH=C:/vcpkg/installed/x64-windows/include
+
+//Path to a program.
+POWERSHELL_EXE:FILEPATH=C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe
 
 //Value Computed by CMake
 QuizSystemCore_BINARY_DIR:STATIC=C:/pp/GemorProject/DataModele/QuizSystemCore/build

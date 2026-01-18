@@ -1,0 +1,107 @@
+{
+    // Workspace файл для проекта Quiz System Core
+    // Открывается командой: code quiz-system.code-workspace
+    
+    // Папки в workspace (может быть несколько)
+    "folders": [
+        {
+            "path": ".",  // Текущая папка (корень проекта)
+            "name": "Quiz System Core"  // Отображаемое имя
+        }
+        // Можно добавить другие папки, например:
+        // {
+        //     "path": "../QuizSystemFrontend",
+        //     "name": "Frontend (React)"
+        // }
+    ],
+    
+    // Настройки workspace (переопределяют user settings)
+    "settings": {
+        // Основные настройки C++
+        "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+        "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
+        
+        // Настройки CMake
+        "cmake.configureOnOpen": true,
+        "cmake.buildDirectory": "${workspaceFolder}/build",
+        "cmake.generator": "Visual Studio 17 2022",
+        "cmake.platform": "x64",
+        
+        // Настройки редактора
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit"
+        },
+        
+        // Ассоциации файлов
+        "files.associations": {
+            "*.h": "cpp",
+            "*.hpp": "cpp",
+            "*.tpp": "cpp",
+            "*.sql": "sql",
+            "*.json": "json"
+        },
+        
+        // Исключить файлы
+        "files.exclude": {
+            "**/.git": true,
+            "**/.vs": true,
+            "**/node_modules": true,
+            "**/build": false  // Не исключаем build, чтобы видеть
+        },
+        
+        // Настройки терминала
+        "terminal.integrated.defaultProfile.windows": "PowerShell",
+        "terminal.integrated.cwd": "${workspaceFolder}",
+        
+        // Git
+        "git.enableSmartCommit": true,
+        "git.autofetch": true
+    },
+    
+    // Рекомендуемые расширения для этого workspace
+    "extensions": {
+        "recommendations": [
+            "ms-vscode.cpptools",
+            "ms-vscode.cmake-tools",
+            "twxs.cmake",
+            "cweijan.vscode-database-client2",
+            "ms-azuretools.vscode-docker",
+            "eamodio.gitlens"
+        ],
+        "unwantedRecommendations": []
+    },
+    
+    // Задачи запуска (launch configurations)
+    "launch": {
+        "configurations": [],
+        "compounds": []
+    },
+    
+    // Задачи (tasks)
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": []
+    },
+    
+    // SCM провайдеры (Source Control)
+    "scm": {
+        "providers": {
+            "git": {
+                "enabled": true,
+                "autoRepositoryDetection": true
+            }
+        }
+    },
+    
+    // Описание workspace
+    "description": "Quiz System Core - система тестирования и опросов на C++ с PostgreSQL",
+    
+    // Метаданные
+    "metadata": {
+        "created": "2024-01-15",
+        "modified": "2024-01-15",
+        "author": "Quiz System Team",
+        "version": "1.0.0"
+    }
+}
