@@ -1,7 +1,7 @@
-// auth.js - обновленная версия
+// public/js/auth.js
 class Auth {
     constructor() {
-        this.API_BASE = '/api'; // Используем относительный путь через Nginx
+        this.API_BASE = '/api';
         this.currentSession = null;
         this.init();
     }
@@ -17,37 +17,43 @@ class Auth {
                 credentials: 'include'
             });
             
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             
             const data = await response.json();
             this.currentSession = data;
             
-            if (data.status === 'unknown') {
-                this.handleUnknownUser();
-            } else if (data.status === 'anonymous') {
-                this.handleAnonymousUser(data);
-            } else if (data.status === 'authorized') {
-                await this.handleAuthorizedUser();
-            }
-            
+            this.handleSessionStatus(data.status, data);
             return data;
         } catch (error) {
             console.error('Session check error:', error);
-            this.handleUnknownUser();
+            this.handleSessionStatus('unknown');
             return { status: 'unknown' };
+        }
+    }
+    
+    handleSessionStatus(status, data = null) {
+        switch(status) {
+            case 'unknown':
+                this.handleUnknownUser();
+                break;
+            case 'anonymous':
+                this.handleAnonymousUser(data);
+                break;
+            case 'authorized':
+                this.handleAuthorizedUser(data);
+                break;
         }
     }
     
     handleUnknownUser() {
         const path = window.location.pathname;
+        const allowedPaths = ['/Registration.html', '/login.html', '/'];
         
-        if (path.includes('Registration.html') || path.includes('login.html')) {
-            return;
+        if (!allowedPaths.some(p => path.includes(p))) {
+            window.location.href = '/Registration.html';
         }
         
-        // Создаем анонимную сессию для новых пользователей
+        // Создаем анонимную сессию
         this.createAnonymousSession();
     }
     
@@ -58,9 +64,8 @@ class Auth {
                 credentials: 'include'
             });
             
-            const data = await response.json();
-            
-            if (data.status === 'anonymous') {
+            if (response.ok) {
+                const data = await response.json();
                 this.currentSession = data;
                 this.updateUI();
             }
@@ -70,29 +75,34 @@ class Auth {
     }
     
     handleAnonymousUser(sessionData) {
-        console.log('Anonymous user session:', sessionData);
+        console.log('Anonymous session:', sessionData);
         this.updateUI();
     }
     
-    async handleAuthorizedUser() {
+    handleAuthorizedUser(sessionData) {
+        // Сохраняем данные пользователя в localStorage
+        if (sessionData.userData) {
+            localStorage.setItem('userData', JSON.stringify(sessionData.userData));
+            localStorage.setItem('userId', sessionData.userData.id);
+        }
+        
         this.updateUI();
         
         // Перенаправляем с страниц авторизации
         if (window.location.pathname.includes('Registration.html') || 
             window.location.pathname.includes('login.html')) {
-            window.location.href = 'index.html';
+            window.location.href = '/';
         }
     }
     
     async login(email, password) {
         try {
-            // Обработка администратора
+            // Специальная обработка для администратора
             if (email.toLowerCase() === 'admin' && password === '1410') {
                 email = 'admin@test.com';
-                password = '1410';
             }
             
-            const response = await fetch(`${this.API_BASE}/auth/email-login`, {
+            const response = await fetch(`${this.API_BASE}/auth/login`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json'
@@ -109,14 +119,11 @@ class Auth {
             }
             
             if (data.success) {
-                // Обновляем сессию до авторизованной
+                // Обновляем сессию
                 await this.upgradeSession(data.accessToken, data.refreshToken, data.user);
                 
-                // Обновляем UI
                 this.updateUI();
-                
-                // Перенаправляем на главную
-                window.location.href = 'index.html';
+                window.location.href = '/';
             } else if (data.error) {
                 alert('Ошибка входа: ' + data.error);
             }
@@ -137,7 +144,6 @@ class Auth {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    sessionToken: this.currentSession?.sessionToken,
                     accessToken,
                     refreshToken,
                     userData
@@ -145,9 +151,8 @@ class Auth {
                 credentials: 'include'
             });
             
-            const data = await response.json();
-            
-            if (data.success) {
+            if (response.ok) {
+                const data = await response.json();
                 this.currentSession = data.session;
                 this.updateUI();
             }
@@ -156,52 +161,9 @@ class Auth {
         }
     }
     
-    async logout(allDevices = false) {
-        try {
-            const body = {};
-            
-            if (allDevices && this.currentSession?.refreshToken) {
-                body.refreshToken = this.currentSession.refreshToken;
-            }
-            
-            await fetch(`${this.API_BASE}/auth/logout`, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(body),
-                credentials: 'include'
-            });
-            
-            // Удаляем сессию на клиенте
-            await fetch(`${this.API_BASE}/session/delete`, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    sessionToken: this.currentSession?.sessionToken
-                }),
-                credentials: 'include'
-            });
-            
-            // Очищаем локальное хранилище
-            localStorage.clear();
-            sessionStorage.clear();
-            
-            // Перенаправляем на страницу авторизации
-            window.location.href = 'Registration.html';
-            
-        } catch (error) {
-            console.error('Logout error:', error);
-            // Все равно очищаем
-            localStorage.clear();
-            window.location.href = 'Registration.html';
-        }
-    }
-    
     updateUI() {
-        const userData = this.currentSession?.userData;
+        const userData = this.currentSession?.userData || 
+                        JSON.parse(localStorage.getItem('userData') || '{}');
         
         // Обновляем шапку
         const header = document.getElementById('header');
@@ -210,8 +172,13 @@ class Auth {
                 header.style.display = 'flex';
                 
                 const usernameElement = document.getElementById('username');
-                if (usernameElement && userData?.username) {
+                if (usernameElement && userData.username) {
                     usernameElement.textContent = userData.username;
+                }
+                
+                const profileImg = document.getElementById('Profile_img');
+                if (profileImg && userData.avatar) {
+                    profileImg.src = userData.avatar;
                 }
             } else {
                 header.style.display = 'none';
@@ -234,12 +201,43 @@ class Auth {
         }
     }
     
-    showVerificationForm(email, password = null) {
-        // Реализация формы верификации
-        // (ваш существующий код остается)
+    async logout(allDevices = false) {
+        try {
+            const body = {};
+            
+            if (allDevices && this.currentSession?.refreshToken) {
+                body.refreshToken = this.currentSession.refreshToken;
+            }
+            
+            await fetch(`${this.API_BASE}/auth/logout`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body),
+                credentials: 'include'
+            });
+            
+            // Очищаем локальное хранилище
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Перенаправляем на страницу авторизации
+            window.location.href = '/Registration.html';
+            
+        } catch (error) {
+            console.error('Logout error:', error);
+            localStorage.clear();
+            window.location.href = '/Registration.html';
+        }
     }
 }
 
 // Глобальный экземпляр
 const auth = new Auth();
 window.auth = auth;
+
+// Экспорт для использования в других файлах
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = auth;
+}
