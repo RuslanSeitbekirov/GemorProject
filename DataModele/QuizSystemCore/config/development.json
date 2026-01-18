@@ -1,0 +1,41 @@
+{
+    "environment": "development",
+    "debug": true,
+    "database": {
+        "host": "localhost",
+        "port": 5432,
+        "name": "quiz_system",
+        "user": "quiz_app",
+        "password": "QuizAppPassword123!",
+        "pool_size": 10,
+        "timeout": 30,
+        "ssl_mode": "disable"
+    },
+    "server": {
+        "host": "0.0.0.0",
+        "port": 8080,
+        "workers": 4,
+        "timeout": 60,
+        "cors": {
+            "enabled": true,
+            "origins": ["http://localhost:3000", "http://localhost:8080"]
+        }
+    },
+    "logging": {
+        "level": "debug",
+        "file": "logs/quiz_system.log",
+        "max_size": "10MB",
+        "max_files": 5,
+        "format": "[%Y-%m-%d %H:%M:%S.%e] [%n] [%^%l%$] %v"
+    },
+    "security": {
+        "jwt_secret": "your-secret-key-change-in-production",
+        "jwt_expiry_hours": 24,
+        "bcrypt_rounds": 12
+    },
+    "features": {
+        "enable_swagger": true,
+        "enable_metrics": true,
+        "enable_profiling": false
+    }
+}
