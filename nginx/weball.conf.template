@@ -1,0 +1,39 @@
+server {
+    listen 80;
+
+    server_name ${TEST_SUBDOMAIN};
+
+    #Accept letsencrypt 
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/html;
+        allow all;
+    }
+    
+    location / {
+        return 301 https://${TEST_SUBDOMAIN}/;
+    }
+    
+}
+server {
+    listen 443 ssl;
+    server_name ${TEST_SUBDOMAIN};
+    #Certs
+    ssl_certificate /etc/letsencrypt/live/${TEST_SUBDOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${TEST_SUBDOMAIN}/privkey.pem;
+
+    location /login/static {
+        proxy_pass http://auth_mod:5000/static;
+    }
+    location /callback/ {
+        proxy_pass http://auth_mod:5000/callback;
+    }
+    location /login {
+        proxy_pass http://auth_mod:5000/login;
+    }
+    location /auth {
+        proxy_pass http://auth_mod:5000/auth;
+    }
+    location / {
+        proxy_pass http://webapp:18080;
+    }   
+}

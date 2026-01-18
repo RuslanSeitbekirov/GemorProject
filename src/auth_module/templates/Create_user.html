@@ -1,0 +1,31 @@
+{% extends "auth.html" %}
+{% block Button_top_right %}
+Log in
+{% endblock %}
+{% block card_form %}
+    <div class="container">
+            <div class="register-card">
+                <h2 class="register_title">Create User</h2>
+                <form method="post">
+                    <input name="username" id="username" class="input-field" type="text" placeholder="Username">
+                    <input name="password" id="password" class="input-field" type="text" placeholder="Password">
+                    <input type="submit" class="register-btn" value="Register"></input>
+                </form>
+            </div>
+        </div>
+{% endblock %}
+{% block card_insta_login %}
+    <div class="container">
+            <div class="register-card">
+                <h2 class="log_in_with_text">Sign up with:</h2>
+                <div class="log_in_with_flex">
+                    <div class="log_in_with_divs">
+                        <a href=""><img class="Log_in_with" src="https://cdn-icons-png.freepik.com/512/3291/3291695.png?ga=GA1.1.1033240715.1766348867" alt=""></a>
+                    </div>
+                    <div class="log_in_with_divs">
+                        <a href=""><img class="Log_in_with" src="https://cdn-icons-png.freepik.com/512/6124/6124986.png?ga=GA1.1.1033240715.1766348867" alt=""></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}

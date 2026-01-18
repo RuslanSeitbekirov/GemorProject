@@ -1,33 +1,4 @@
 services:
-  nginx:
-    image: nginx:alpine
-    depends_on: 
-      - auth_module
-      - web_app
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/weball.conf.template:/etc/nginx/templates/weball.conf.template
-      - etc-letsencrypt:/etc/letsencrypt
-      - www-html:/var/www/html
-    environment:
-      TEST_SUBDOMAIN: ${TEST_SUBDOMAIN}
-    command: nginx -g 'daemon off;' 
-    #command: ls /etc/letsencrypt/live/test.cubekii.su
-    restart: on-failure
-    networks:
-      - nginx-net
-    
-  certbot:
-    image: certbot/certbot
-    depends_on:
-      - nginx
-    volumes:
-      - etc-letsencrypt:/etc/letsencrypt
-      - www-html:/var/www/html
-    command: certonly --webroot --webroot-path=/var/www/html --email ${EMAIL_FOR_SSL} --agree-tos --no-eff-email -d ${TEST_SUBDOMAIN}
-       
   redis_web:
     image: redis:8.4.0-alpine
     restart: unless-stopped
@@ -43,10 +14,10 @@ services:
       - redis_web
     build: src/web_module
     restart: on-failure
+    ports:
+      - "18080:18080"
     networks:
       - red-web
-      - nginx-net
-    hostname: webapp
 
   tg_core:
     build: src/tg_bot_module
@@ -101,10 +72,10 @@ services:
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
       YANDEX_CLIENT_ID: ${YANDEX_CLIENT_ID}
       YANDEX_CLIENT_SECRET: ${YANDEX_CLIENT_SECRET}
-    hostname: auth_mod
+    ports:
+      - "5000:5000"
     networks:
       - mongo-net
-      - nginx-net
 
 networks:
   db-net:
@@ -113,9 +84,5 @@ networks:
     driver: bridge
   mongo-net:
     driver: bridge
-  nginx-net:
-    driver: bridge
 volumes:
   mongodb_data:
-  etc-letsencrypt:
-  www-html:
