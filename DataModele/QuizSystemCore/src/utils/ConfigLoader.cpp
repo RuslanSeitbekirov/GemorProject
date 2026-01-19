@@ -1,5 +1,5 @@
 #include <filesystem>
-#include "../../include/Utils/ConfigLoader.h"
+#include "utils/ConfigLoader.h"
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 

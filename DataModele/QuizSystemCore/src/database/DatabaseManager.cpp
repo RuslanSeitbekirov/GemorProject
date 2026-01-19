@@ -1,4 +1,4 @@
-#include "Database/DatabaseManager.h"
+#include "database/DatabaseManager.h"
 #include <iostream>
 
 namespace QuizSystem::Core {

@@ -84,7 +84,7 @@ target_include_directories(quiz_system_core PRIVATE
 # ============================================
 
 target_link_libraries(quiz_system_core PRIVATE
-    cpprestsdk::cpprest      # ⚠️ ИСПРАВЛЕНО: cpprestsdk::cpprest
+    cpprestsdk::cpprest     
     OpenSSL::SSL
     OpenSSL::Crypto
     spdlog::spdlog

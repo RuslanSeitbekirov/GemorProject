@@ -35,7 +35,7 @@ void printBanner() {
     ║      🚀 Quiz System Core - Система тестирования      ║
     ║                   Версия 1.0.0                      ║
     ║                                                      ║
-    ║      🔗 API: http://localhost:8080                   ║
+    ║      🔗 API: http://localhost:18081                   ║
     ║      📊 PGAdmin: http://localhost:5050               ║
     ║      🗄️  База данных: localhost:5432/quiz_system     ║
     ║                                                      ║

@@ -8,7 +8,7 @@
 namespace QuizSystem {
 namespace Core {
 
-class DatabaseManager;
+class DatabaseManager; // Только объявление, если не используется
 class HttpServer;
 
 class Application {
@@ -33,19 +33,9 @@ public:
     bool isRunning() const;
     
 private:
-    // Инициализация базы данных
-    bool initializeDatabase();
-    
-    // Инициализация HTTP сервера
-    bool initializeHttpServer();
-    
-    // Регистрация API endpoints
-    void registerApiEndpoints();
-    
-private:
     std::atomic<bool> m_isRunning;
-    std::unique_ptr<DatabaseManager> m_databaseManager;
     std::unique_ptr<HttpServer> m_httpServer;
+    // Убрал DatabaseManager если он не используется
 };
 
 } // namespace Core
