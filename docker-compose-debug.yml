@@ -1,0 +1,88 @@
+services:
+  redis_web:
+    image: redis:8.4.0-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --save 20 1 --loglevel warning
+    networks:
+      - red-web
+    hostname: redis-web
+
+  web_app:
+    depends_on:
+      - redis_web
+    build: src/web_module
+    restart: on-failure
+    ports:
+      - "18080:18080"
+    networks:
+      - red-web
+
+  tg_core:
+    build: src/tg_bot_module
+    restart: on-failure
+    environment:
+      - TOKEN=${TOKEN}
+
+  postgres:
+    image: postgres:18.1-alpine3.23
+    restart: on-failure
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: poll_system
+    networks:
+      - db-net
+    hostname: postgres-db
+
+  sql_module:
+    build: src/sql_module
+    depends_on:
+      - postgres
+    restart: on-failure
+    networks:
+      - db-net
+    environment:
+      DATABASE_URL: host=postgres-db user=postgres password=${POSTGRES_PASSWORD} dbname=poll_system sslmode=disable
+    ports:
+      - "8080:8080"
+
+  mongodb: #27017:27017
+    image: mongo:latest
+    restart: unless-stopped
+    #ports: #just for development
+    #  - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    networks:
+      - mongo-net
+    hostname: mongo
+    volumes:
+      - mongodb_data:/data/db
+
+  auth_module:
+    build: src/auth_module
+    depends_on:
+      - mongodb
+    environment:
+      MONGO_URI: mongodb://root:example@mongo:27017
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      YANDEX_CLIENT_ID: ${YANDEX_CLIENT_ID}
+      YANDEX_CLIENT_SECRET: ${YANDEX_CLIENT_SECRET}
+    ports:
+      - "5000:5000"
+    networks:
+      - mongo-net
+
+networks:
+  db-net:
+    driver: bridge
+  red-web:
+    driver: bridge
+  mongo-net:
+    driver: bridge
+volumes:
+  mongodb_data:

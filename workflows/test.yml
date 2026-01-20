@@ -1,0 +1,74 @@
+on:
+  push:
+    branches:
+      - main
+jobs:
+  test:
+    runs-on: alpine #runner name
+    steps:
+      - name: Setup nodejs
+        run:
+          apk add nodejs
+
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: Cache apk packages
+        uses: actions/cache@v3
+        with:
+          path: /var/cache/apk
+          key: ${{ runner.os }}-apk-${{ hashFiles('**/apk-packages.txt')}}
+          restore-keys:
+            ${{ runner.os }}-apk-
+
+      - name: setup Golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: '>=1.25.5' 
+
+      - name: install requirements
+        run: |
+          apk update 
+          apk add cmake g++ make python3 py3-pip
+          pip install --break-system-packages conan
+
+      - name: check build web module
+        continue-on-error: true
+        run: |
+          cd src/web_module
+          conan profile detect --force
+          conan install . --output-folder=build --build=missing
+          cmake --preset conan-release
+          cd build/build/Release
+          cmake --build .
+
+      - name: check build sql_module
+        run: |
+          cd src/sql_module
+          go mod tidy
+          go build -o sql_module
+
+      - name: check build tg_bot_module
+        run: |
+          cd src/tg_bot_module
+          go mod tidy
+          go build -o sql_module
+
+  deploy:
+    runs-on: alpine
+    needs: test
+    steps:
+      - name: setup bash and curl
+        run: apk add bash curl
+
+      - name: Remote deploy
+        uses: actions/appleboy-ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USERNAME }}
+          password: ${{ secrets.DEPLOY_PASSWORD }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          script: |
+            cd group_project
+            git pull 
+            docker compose up -d --build

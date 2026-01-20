@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plagin - Опросы и тесты</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/style_index.css"> 
+    <link rel="icon" href="/static/favicon.ico" type="image/png">
+</head>
+<body>
+    <div class="">
+        <!-- Header --> 
+        <header>
+            <div class="header-container">
+                <!-- Logo -->
+                <div class="logo">
+                    <div class="logo-text-container">
+                        <div class="logo-text-box">
+                            <span class="logo-text">Plagin<span class="logo-check">✓</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auth Status  -->
+                <div class="auth-status" id="authStatus">
+                    <span id="userName">Гость</span>
+                    <i class="fas fa-user" id="userIcon"></i>
+                </div>
+
+                <!-- Burger Menu -->
+                <button class="burger-menu" id="burgerButton">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </header>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <!-- Mobile Menu - Right Side -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <div class="mobile-menu-title">Меню</div>
+            <button class="mobile-menu-close" id="menuCloseButton">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mobile-menu-content">
+            <!-- Главная всегда доступна -->
+            <a href="/" class="mobile-menu-item">
+                <i class="fas fa-home"></i>
+                <span>Главная</span>
+            </a>
+            
+            <!-- Для авторизованных пользователей -->
+            <div id="authorizedLinks" style="display: none;">
+                <a href="/dashboard" class="mobile-menu-item">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Мои опросы</span>
+                </a>
+                <a href="#" class="mobile-menu-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Аналитика</span>
+                </a>
+                <a href="#" class="mobile-menu-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Настройки</span>
+                </a>
+                <a href="/profile" class="mobile-menu-item">
+                    <i class="fas fa-user"></i>
+                    <span>Профиль</span>
+                </a>
+                <a href="/logout" class="mobile-menu-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Выйти</span>
+                </a>
+            </div>
+            
+            <!-- Для неавторизованных пользователей -->
+            <div id="unauthorizedLinks">
+                <a href="https://test.cubekii.su/login?type=github" class="mobile-menu-item">
+                    <i class="fab fa-github"></i>
+                    <span>Войти через GitHub</span>
+                </a>
+                <a href="https://test.cubekii.su/login?type=yandex" class="mobile-menu-item">
+                    <i class="fab fa-yandex"></i>
+                    <span>Войти через Яндекс</span>
+                </a>
+            </div>
+        </div>
+        <!-- Theme Toggle Button at bottom -->
+        <div class="theme-toggle-container">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+                <span>Тёмная тема</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container main-container">
+        <section class="hero-section">
+            <h1 class="hero-title" id="welcomeMessage">Добро пожаловать в Plagin</h1>
+            <p class="hero-subtitle">Создавайте, проходите и анализируйте опросы и тесты с помощью нашего интуитивного интерфейса.</p>
+            
+            <!-- Кнопки авторизации (видны всем) -->
+            <div class="auth-buttons">
+                <a href="https://test.cubekii.su/login" class="auth-button code">
+                    <i class="fas fa-key"></i>
+                    <span>Регистрация</span>
+                </a>
+            </div>
+            
+            <!-- Контент для авторизованных (скрыт по умолчанию) -->
+            <div id="authorizedContent" style="display: none; margin-top: 2rem;">
+                <div class="user-welcome">
+                    <h3>Добро пожаловать, <span id="displayName"></span>!</h3>
+                    <p>Перейдите в <a href="/dashboard">личный кабинет</a> для работы с опросами.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon blue">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <h3 class="feature-title">Создание опросов</h3>
+                <p class="feature-description">Легко создавайте опросы с различными типами вопросов и настраивайте их под свои нужды.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon green">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h3 class="feature-title">Прохождение тестов</h3>
+                <p class="feature-description">Участвуйте в интересных опросах и тестах, проверяйте свои знания и получайте результаты.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon purple">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h3 class="feature-title">Анализ результатов</h3>
+                <p class="feature-description">Получайте детальную статистику по вашим опросам и используйте данные для принятия решений.</p>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <h2 class="cta-title">Готовы начать?</h2>
+            <p class="cta-subtitle" id="ctaSubtitle">Войдите в систему, чтобы создавать опросы!</p>
+            <div id="ctaButtons">
+                <!-- Для авторизованных -->
+                <div id="authorizedCTA" style="display: none;">
+                    <a href="/dashboard" class="cta-button">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Перейти в кабинет
+                    </a>
+                    <a href="/create-survey" class="cta-button secondary">
+                        <i class="fas fa-plus"></i>
+                        Создать опрос
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="container">
+        <!-- Footer -->
+        <footer>
+            <div class="footer-container">
+                <div class="footer-content">
+                    <div class="footer-logo">
+                        <div class="footer-logo-text-container">
+                            <div class="footer-logo-text-box">
+                                <span class="footer-logo-text">Plagin<span class="footer-logo-check">✓</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="footer-text">© 2025 Plagin. Все права защищены.</div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Проверка статуса при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            
+            // Остальной код меню...
+            const burgerButton = document.getElementById('burgerButton');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuOverlay = document.getElementById('menuOverlay');
+            const menuCloseButton = document.getElementById('menuCloseButton');
+            const themeToggle = document.getElementById('themeToggle');
+
+            function openMenu() {
+                mobileMenu.classList.add('active');
+                menuOverlay.classList.add('active');
+                burgerButton.querySelector('i').classList.remove('fa-bars');
+                burgerButton.querySelector('i').classList.add('fa-times');
+            }
+
+            function closeMenu() {
+                mobileMenu.classList.remove('active');
+                menuOverlay.classList.remove('active');
+                burgerButton.querySelector('i').classList.remove('fa-times');
+                burgerButton.querySelector('i').classList.add('fa-bars');
+            }
+
+            burgerButton.addEventListener('click', () => {
+                if (mobileMenu.classList.contains('active')) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            });
+
+            menuCloseButton.addEventListener('click', closeMenu);
+            menuOverlay.addEventListener('click', closeMenu);
+
+            // Тема
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                
+                const icon = themeToggle.querySelector('i');
+                const text = themeToggle.querySelector('span');
+                
+                if (isDarkMode) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    text.textContent = 'Светлая тема';
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    text.textContent = 'Тёмная тема';
+                }
+                
+                try {
+                    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+                } catch (e) {}
+            });
+
+            // Загрузка темы
+            try {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    const icon = themeToggle.querySelector('i');
+                    const text = themeToggle.querySelector('span');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    text.textContent = 'Светлая тема';
+                }
+            } catch (e) {}
+        });
+
+        // Функция проверки статуса авторизации
+        function checkAuthStatus() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'authorized') {
+                        // Авторизованный пользователь
+                        showAuthorizedView(data.user_id);
+                    } else {
+                        // Неавторизованный или анонимный
+                        showUnauthorizedView();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking auth status:', error);
+                    showUnauthorizedView();
+                });
+        }
+
+        function showAuthorizedView(userId) {
+            // Обновляем приветствие
+            document.getElementById('welcomeMessage').textContent = `Добро пожаловать, ${userId || 'Пользователь'}!`;
+            document.getElementById('displayName').textContent = userId || 'Пользователь';
+            document.getElementById('userName').textContent = userId || 'Пользователь';
+            
+            // Показываем авторизованный контент
+            document.getElementById('authorizedContent').style.display = 'block';
+            document.getElementById('authorizedLinks').style.display = 'block';
+            document.getElementById('unauthorizedLinks').style.display = 'none';
+            document.getElementById('authorizedCTA').style.display = 'block';
+            document.getElementById('unauthorizedCTA').style.display = 'none';
+            
+            // Обновляем CTA
+            document.getElementById('ctaSubtitle').textContent = 'Используйте все возможности системы!';
+            
+            // Меняем иконку пользователя
+            document.getElementById('userIcon').className = 'fas fa-user-check';
+        }
+
+        function showUnauthorizedView() {
+            // Скрываем авторизованный контент
+            document.getElementById('authorizedContent').style.display = 'none';
+            document.getElementById('authorizedLinks').style.display = 'none';
+            document.getElementById('unauthorizedLinks').style.display = 'block';
+            document.getElementById('authorizedCTA').style.display = 'none';
+            document.getElementById('unauthorizedCTA').style.display = 'block';
+            
+            // Сбрасываем приветствие
+            document.getElementById('welcomeMessage').textContent = 'Добро пожаловать в Plagin';
+            document.getElementById('userName').textContent = 'Гость';
+            document.getElementById('userIcon').className = 'fas fa-user';
+            
+            // Обновляем CTA
+            document.getElementById('ctaSubtitle').textContent = 'Войдите в систему, чтобы создавать опросы!';
+        }
+    </script>
+</body>
+</html>
+

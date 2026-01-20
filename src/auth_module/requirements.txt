@@ -1,0 +1,6 @@
+Flask
+PyJWT
+pymongo
+requests
+requests-oauthlib
+python-dotenv
