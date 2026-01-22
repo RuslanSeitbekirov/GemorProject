@@ -15,7 +15,7 @@ services:
     build: src/web_module
     restart: on-failure
     ports:
-      - "18080:18080"
+      - "8080:8080"
     networks:
       - red-web
 

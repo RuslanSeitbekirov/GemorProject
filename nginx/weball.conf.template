@@ -1,39 +1,30 @@
 server {
     listen 80;
-
-    server_name ${TEST_SUBDOMAIN};
-
-    #Accept letsencrypt 
-    location ^~ /.well-known/acme-challenge/ {
-        root /var/www/html;
-        allow all;
-    }
+    server_name error-403.ru www.error-403.ru; # Указан ваш домен
     
     location / {
-        return 301 https://${TEST_SUBDOMAIN}/;
+        proxy_pass http://web_app:8080;  # Обратите внимание: порт 8080!
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        sub_filter 'https://test.cubekii.su' 'http://error-403.ru';
+        sub_filter 'test.cubekii.su' 'error-403.ru';
+        sub_filter_once off;
+        sub_filter_types text/html application/javascript;
     }
     
-}
-server {
-    listen 443 ssl;
-    server_name ${TEST_SUBDOMAIN};
-    #Certs
-    ssl_certificate /etc/letsencrypt/live/${TEST_SUBDOMAIN}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${TEST_SUBDOMAIN}/privkey.pem;
+    location /auth/ {
+        proxy_pass http://web_app:8080;  # И здесь тоже порт 8080!
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
 
-    location /login/static {
-        proxy_pass http://auth_mod:5000/static;
-    }
-    location /callback/ {
-        proxy_pass http://auth_mod:5000/callback;
-    }
     location /login {
-        proxy_pass http://auth_mod:5000/login;
+        proxy_pass http://web_app:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        # Здесь можно обработать логин
     }
-    location /auth {
-        proxy_pass http://auth_mod:5000/auth;
-    }
-    location / {
-        proxy_pass http://webapp:18080;
-    }   
 }

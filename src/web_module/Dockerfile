@@ -14,6 +14,12 @@ RUN cmake --build build/build/Release
 
 FROM alpine:3.23.2
 WORKDIR /app
-RUN apk add asio-dev
+
+RUN apk add --no-cache asio-dev netcat-openbsd bash
+
 COPY --from=builder /app/build/build/Release/bin .
-CMD ["./web_app"]
+
+COPY wait-for-redis.sh /wait-for-redis.sh
+RUN chmod +x /wait-for-redis.sh
+
+CMD ["/wait-for-redis.sh", "redis_web", "6379", "./web_app"]

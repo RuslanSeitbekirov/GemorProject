@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"log" 
+	"log"
 	"sql_module/internal/config"
 	"sql_module/internal/server"
 	"sql_module/pkg/database"

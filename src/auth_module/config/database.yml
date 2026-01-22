@@ -1,0 +1,9 @@
+postgres:
+  adapter: postgresql
+  host: postgres
+  port: 5432
+  database: poll_system
+  username: postgres
+  password: 123456
+  pool: 5
+  timeout: 5000

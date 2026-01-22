@@ -12,7 +12,7 @@ var jwtSecret = []byte("your-secret-key-change-in-production")
 
 func Load() *Config {
 	return &Config{
-		DatabaseURL: getenv("DATABASE_URL", "host=localhost user=postgres password=password dbname=poll_system sslmode=disable"),
+		DatabaseURL: getenv("DATABASE_URL", "host=postgres user=postgres password=123456 dbname=poll_system sslmode=disable"),
 		PortServer:  getenv("SERVER_PORT", ":8080"),
 		JWTSecret:   getenv("JWT_SECRET", "your-secret-key-change-in-production"),
 	}

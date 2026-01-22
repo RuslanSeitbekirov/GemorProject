@@ -1,34 +1,25 @@
+version: '3.8'
+
 services:
   nginx:
     image: nginx:alpine
-    depends_on:
+    depends_on: 
+      - auth_module
       - web_app
     ports:
-      - "80:80"
+      - "80:80"  # Только HTTP пока
     volumes:
-      - ./nginx/weball.conf.template:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/weball.conf.template:/etc/nginx/templates/weball.conf.template
+      - ./www-html:/var/www/html  # Локальная папка
+    command: nginx -g 'daemon off;'
     restart: unless-stopped
     networks:
       - app-network
 
   redis_web:
-    image: redis:alpine
+    image: redis:8.4.0-alpine
     restart: unless-stopped
-    networks:
-      app-network:
-        aliases:
-          - redis-web
-
-  postgres:
-    image: postgres:15-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: poll_system
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./src/sql_module/scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: redis-server --save 20 1 --loglevel warning --bind 0.0.0.0
     networks:
       - app-network
 
@@ -37,44 +28,62 @@ services:
       - redis_web
     build: src/web_module
     restart: unless-stopped
-    ports:
-      - "18080:8080"
     environment:
       - REDIS_HOST=redis_web
       - REDIS_PORT=6379
     networks:
       - app-network
 
-  sql_module:
-    build: src/sql_module
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: postgresql://postgres:123456@postgres:5432/poll_system
-    networks:
-      - app-network
-
   tg_core:
     build: src/tg_bot_module
     restart: unless-stopped
-    # Добавляем socat в контейнер
+    depends_on:
+      - redis_web
+      - postgres
+      - mongodb
     environment:
       - TOKEN=8225871746:AAFaiBY79eqAPRBI8B3fqXrRST7dKHXS4Lg
-      - REDIS_HOST=localhost  # Теперь будет работать с socat
+      - REDIS_HOST=redis_web
       - REDIS_PORT=6379
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123456
       - POSTGRES_DB=poll_system
+      - MONGODB_HOST=mongodb
+      - MONGODB_PORT=27017
     networks:
       - app-network
-      
+
+  postgres:
+    image: postgres:18.1-alpine3.23
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: poll_system
+    networks:
+      - app-network
+
+  sql_module:
+    build: src/sql_module
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - app-network
+    environment:
+      DATABASE_URL: host=postgres user=postgres password=123456 dbname=poll_system sslmode=disable
+    ports:
+      - "8080:8080"
+
   mongodb:
     image: mongo:latest
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
+    command: mongod --bind_ip_all
     networks:
       - app-network
     volumes:
@@ -85,7 +94,7 @@ services:
     depends_on:
       - mongodb
     environment:
-      MONGO_URI: mongodb://root:example@mongodb:27017/auth_db
+      MONGO_URI: mongodb://root:example@mongodb:27017
       GITHUB_CLIENT_ID: test
       GITHUB_CLIENT_SECRET: test
       YANDEX_CLIENT_ID: test
@@ -98,5 +107,4 @@ networks:
     driver: bridge
 
 volumes:
-  postgres_data:
   mongodb_data:

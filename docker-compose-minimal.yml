@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    depends_on: 
+      - web_app
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/weball.conf.template:/etc/nginx/templates/weball.conf.template
+    command: nginx -g 'daemon off;'
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  redis_web:
+    image: redis:alpine
+    restart: unless-stopped
+    command: redis-server --bind 0.0.0.0 --protected-mode no
+    networks:
+      - app-network
+
+  web_app:
+    depends_on:
+      - redis_web
+    build: src/web_module
+    restart: unless-stopped
+    environment:
+      REDIS_HOST: redis_web
+      REDIS_PORT: 6379
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

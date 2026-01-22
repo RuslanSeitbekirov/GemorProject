@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	connStr := "postgres://postgres:password@localhost:5432/poll_system?sslmode=disable"
+	connStr := "postgres://postgres:123456@postgres:5432/poll_system?sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)

@@ -1,3 +1,27 @@
+<h1>Prerelice 1.1 </h1>
+Поправлены порты для ТГ бота.
+
+
+<h1>Prerelice 1.0 </h1>
+Для запуска
+```
+ 1. Перейти в директорию проекта
+cd /home/group_project
+
+ 2. Проверить конфигурацию
+cat nginx/weball.conf.template | grep proxy_pass
+cat docker-compose.yml | grep -A2 "web_app:" | grep ports
+
+ 3. Запустить всё
+docker compose down
+docker compose up -d --build
+
+ 4. Проверить
+sleep 10
+docker compose ps
+curl http://localhost
+```
+
 <h1>beta 1.2</h1>
 
 # Запуск проекта 
